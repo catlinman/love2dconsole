@@ -4,12 +4,16 @@ console.enabled = true -- If true the user is able to show/hide the console.
 console.alert = true -- If true the console will display a widget on warnings and errors.
 
 -- Configuration file tables.
-console.style = {}
-console.style.colors = {}
-console.keys = {}
+console.conf = {}
+console.conf.colors = {}
+console.conf.keys = {}
+
+-- This variable contains the font data used by the console.
+local basefont = love.graphics.getFont() -- Store the default font.
+local consolefont = basefont -- Temporarily store the default font which will be overwritten later on.
 
 local commands = {} -- Table containing command callbacks.
-local input = "" -- String containing a user entered string command.
+local inputfield = "" -- String containing a user entered string command.
 local active = true -- If true the console will be shown.
 local status = false -- Disable the console if there was a fatal error.
 local statusMessage = "" -- Variable holding the last fatal error message.
@@ -18,10 +22,8 @@ local consoleStackSize = 100 -- Maximum number of lines stored in the console st
 local consoleStack = {} -- Table containing the console printed lines.
 
 -- Track the number of unchecked errors and warnings.
-local warningCount = 0
-local errorCount = 0
+local warningCount, errorCount = 0, 0
 
-local cs = console.style -- Short name to keep things more tidy.
 local screenWidth, screenHeight = love.graphics.getDimensions() -- Store the screen size.
 
 -- Console functions that can be called outside of console.lua
@@ -31,8 +33,7 @@ function console.toggle()
 		active = true
 
 		-- The console was opened and the errors were seen. Remove the outside widget.
-		warningCount = 0
-		errorCount = 0
+		warningCount, errorCount = 0, 0
 	else
 		active = false
 	end
@@ -63,8 +64,7 @@ end
 -- Clear the console.
 function console.clear()
 	consoleStack = {}
-	warningCount = 0
-	errorCount = 0
+	warningCount, errorCount = 0, 0
 end
 
 -- Add a command to the command table.
@@ -87,23 +87,30 @@ function console.removeCommand(name)
 end
 
 -- These functions need to be called from main.lua
+-- Draw the console and it's contents.
 function console.draw()
 	if status == true and active == true then
-		love.graphics.setColor(cs.colors.background.red, cs.colors.background.green, cs.colors.background.blue, cs.colors.background.alpha)
-		love.graphics.rectangle("fill", 0, 0, screenWidth, 48 + cs.textMargin)
+		love.graphics.setFont(consolefont)
 
-		love.graphics.setColor(cs.colors.outline.red, cs.colors.outline.green, cs.colors.outline.blue, cs.colors.outline.alpha)
-		love.graphics.rectangle("fill", 0, 48 + cs.textMargin, screenWidth, cs.outlineSize)
+		love.graphics.setColor(console.conf.colors.background.r, console.conf.colors.background.g, console.conf.colors.background.b, console.conf.colors.background.a)
+		love.graphics.rectangle("fill", 0, 0, screenWidth, (console.conf.fontSize * 2) + console.conf.textMargin)
 
-		love.graphics.setColor(cs.colors.input.red, cs.colors.input.green, cs.colors.input.blue, cs.colors.input.alpha)
-		love.graphics.print("> " ..input, 4, cs.textMargin)
+		love.graphics.setColor(console.conf.colors.outline.r, console.conf.colors.outline.g, console.conf.colors.outline.b, console.conf.colors.outline.a)
+		love.graphics.rectangle("fill", 0, (console.conf.fontSize * 2) + console.conf.textMargin, screenWidth, console.conf.outlineSize)
+
+		love.graphics.setColor(console.conf.colors.input.r, console.conf.colors.input.g, console.conf.colors.input.b, console.conf.colors.input.a)
+		love.graphics.print("> " ..inputfield, console.conf.textMargin, console.conf.textMargin)
+
+		-- Reset the color and font in case someone decides to do drawing after the console (which doesn't make sense but who cares).
+		love.graphics.setColor(255, 255, 255, 255)
+		love.graphics.setFont(basefont)
 	end
 end
 
+-- Receive pressed keys and interpret them.
 function console.keypressed(key)
-	print(key)
 	if console.enabled == true then
-		if key == console.keys.toggle then
+		if key == console.conf.keys.toggle then
 			if status == true then
 				-- Update the screen size and display the console.
 				screenWidth, screenHeight = love.graphics.getDimensions()
@@ -111,13 +118,18 @@ function console.keypressed(key)
 			else
 				print("[Console] Failed to activate the console due to a fatal error: " ..statusMessage)
 			end
+		elseif key == "return" then
+			if active == true then
+
+			end
 		end
 	end
 end
 
+-- Send text input to the console input field.
 function console.textinput(s)
 	if status == true and active == true then
-		input = input .. s
+		inputfield = inputfield .. s
 	end
 end
 
@@ -126,16 +138,33 @@ local loaded, chunk, message
 loaded, chunk = pcall(love.filesystem.load, "console.conf.lua")
 if not loaded then
 	print('[Console] Failed to load the configuration file due to the following error: ' .. tostring(chunk))
-	status = false
+	status, active = false, false
 	statusMessage = message
 else
 	loaded, message = pcall(chunk)
 
 	if not loaded then
 		print('[Console] Executing the configuration file returned the following error: ' .. tostring(message))
-		status = false
+		status, active = false, false
 		statusMessage = message
 	else
+		-- The file was loaded correctly.
 		status = true
+
+		-- Load font data.
+		local fontstatus, font = pcall(
+			function()
+				if console.conf.fontName ~= "" then
+					return love.graphics.newFont(console.conf.fontName, console.conf.fontSize)
+				else
+					return love.graphics.newFont(console.conf.fontSize)
+				end
+			end
+		)
+		if not fontstatus then
+			print('[Console] Loading the custom defined console font returned the following error: ' .. tostring(message) ..' - reverting to the default font instead.')
+		else
+			consolefont = font 
+		end
 	end
 end
