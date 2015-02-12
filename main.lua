@@ -4,7 +4,7 @@
 require("console") -- Require the console script.
 
 function love.draw()
-	love.graphics.setBackgroundColor(0, 0, 0) -- Set a lame background.
+	love.graphics.setBackgroundColor(10, 25, 50) -- Set a lame background.
 	console.draw() -- Draw the console at the end of the draw loop.
 end
 
