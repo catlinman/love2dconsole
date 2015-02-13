@@ -60,7 +60,10 @@ console.conf.outlineSize = 1 -- Outline height at the bottom of the console.
 console.conf.stackMax = 100  -- Maximum number of lines stored in the console stack before old lines are removed.
 console.conf.sizeMin = 5 -- Minimum lines the console should display before extending to the max size.
 console.conf.sizeMax = 10 -- Maximum number of entries to print at a time.
+console.conf.shiftAmount = 1 -- Amount of lines to move over while scrolling up and down.
 
 console.conf.keys.toggle = "f10" -- Key used to toggle the console during runtime.
 console.conf.keys.scrollUp = "pageup" -- Key used to scroll up within the console's message stack.
 console.conf.keys.scrollDown = "pagedown" -- Key used to scroll down within the console's message stack.
+console.conf.keys.scrollTop = "pagedown" -- Key used to move to the top of the stack.
+console.conf.keys.scrollBottom = "pagedown" -- Key used to move to the bottom of the stack.

@@ -14,16 +14,40 @@ local consoleFont = baseFont -- Temporarily store the default font which will be
 local consoleCommands = {} -- Table containing command callbacks.
 local consoleInput = "" -- String containing a user entered string command.
 local consoleActive = false -- If true the console will be shown.
-local consoleStatus = false -- Disable the console if there was a fatal error.
-local consoleStatusMessage = "" -- Variable holding the last fatal error message.
+local consoleStatus = false -- Tracks if the console can be safely used. If false it will disable itself.
+local consoleStatusError = "" -- Variable holding the last fatal error message.
 
 local consoleStack = {} -- Table containing the console printed lines.
 local consoleStackCount = 0 -- Current number of lines the console should accommodate for.
+local consoleStackShift = 0 -- Amount of lines to shift the output by.
 
 local warningCount, errorCount = 0, 0 -- Track the number of unchecked errors and warnings.
 
 local screenWidth, screenHeight = love.graphics.getDimensions() -- Store the screen size.
 
+-- String splitting function.
+local function split(str, delim)
+	if string.find(str, delim) == nil then
+		return {str}
+	end
+
+	local result = {}
+	local pat = "(.-)" .. delim .. "()"
+	local nb = 0
+	local lastPos
+
+	for part, pos in string.gfind(str, pat) do
+		nb = nb + 1
+		result[nb] = part
+		lastPos = pos
+	end
+
+	result[nb + 1] = string.sub(str, lastPos)
+
+	return result
+end
+
+-- Range iterator function.
 local function range(a, b, step)
 	if not b then
 		b = a
@@ -100,23 +124,10 @@ function console.error(message)
 	consolePass(message, "error")
 end
 
--- Tell the console to execute a command from a string argument.
-function console.execute(name)
-	if consoleCommands[name] then
-		consoleCommands[name].callback(consoleCommands[name].arguments)
-	end
-end
-
--- Clear the console.
-function console.clear()
-	consoleStack = {}
-	warningCount, errorCount = 0, 0
-end
-
--- Add a command to the command table.
-function console.addCommand(name, callback, args)
+-- Add a command to the command table. Callback is the function executed when the command is run.
+function console.addCommand(name, callback, description)
 	if not consoleCommands[name] then
-		consoleCommands[name] = {["callback"] = callback, ["arguments"] = args}
+		consoleCommands[name] = {["callback"] = callback, ["description"] = description or ""}
 	else
 		print("[Console] The command with the name of " ..name " already exists in the command table.")
 	end
@@ -130,6 +141,46 @@ function console.removeCommand(name)
 	else
 		print("[Console] Unable to find the command with the name of " ..name " in the command table.")
 	end
+end
+
+-- Tell the console to execute a command from a string argument.
+function console.execute(line)
+	local arguments = split(line, " ")
+	local command = arguments[1]
+
+	-- Remove the command argument from the argument table
+	table.remove(arguments, 1)
+
+	if consoleCommands[command] then
+		local status, err
+
+		if arguments[1] then
+			status, err = pcall(
+				function()
+					 consoleCommands[command].callback(arguments)
+				end
+			)
+		else
+			status, err = pcall(
+				function()
+					 consoleCommands[command].callback()
+				end
+			)
+		end
+
+		if err then
+			console.print(string.format("Executing %s returned the following error: %s", command, tostring(err)))
+		end
+	else
+		console.print(string.format("Unknown command '%s'", command))
+	end
+end
+
+-- Clear the console.
+function console.clear()
+	consoleStack = {}
+	consoleStackCount = 0
+	warningCount, errorCount = 0, 0
 end
 
 -- These functions need to be called from main.lua
@@ -160,7 +211,7 @@ function console.draw()
 
 		-- Draw the message stack with the message coloring.
 		for i in range(math.min(console.conf.sizeMax, #consoleStack)) do
-			local entry = consoleStack[math.max(1, (#consoleStack - math.min(console.conf.sizeMax, #consoleStack) + i))]
+			local entry = consoleStack[math.max(1, (#consoleStack - math.min(console.conf.sizeMax, #consoleStack) + i - consoleStackShift))]
 			if entry.color == "warning" then
 				love.graphics.setColor(console.conf.colors.warning.r, console.conf.colors.warning.g, console.conf.colors.warning.b, console.conf.colors.warning.a)
 
@@ -184,11 +235,14 @@ function console.draw()
 			(math.min(consoleStackCount, console.conf.sizeMax) * console.conf.fontSize)
 		)
 
-		-- Reset the color and font in case someone decides to do drawing after the console (which doesn"t make sense but who cares).
+		-- Reset the color and font in case someone decides to do drawing after the console (which doesn't make sense but who cares).
 		love.graphics.setColor(255, 255, 255, 255)
 		love.graphics.setFont(baseFont)
 	end
 end
+
+-- Tell LÖVE2D to allow repeating key presses. Comment this line if you don't want the given functionality.
+love.keyboard.setKeyRepeat(true)
 
 -- Receive pressed keys and interpret them.
 function console.keypressed(key)
@@ -199,12 +253,28 @@ function console.keypressed(key)
 				screenWidth, screenHeight = love.graphics.getDimensions()
 				console.toggle()
 			else
-				print("[Console] Failed to activate the console due to a fatal error: " ..consoleStatusMessage)
+				print("[Console] Failed to activate the console due to a fatal error: " ..consoleStatusError)
 			end
 		elseif key == "return" then
 			if consoleActive == true then
-				console.print(string.format('"%s"', consoleInput))
+				console.execute(consoleInput)
 				consoleInput = ""
+			end
+		elseif key == "backspace" then
+			if consoleActive == true then
+				consoleInput = string.gsub(consoleInput, "[^\128-\191][\128-\191]*$", "")
+			end
+		elseif key == console.conf.keys.scrollUp then
+			if consoleActive == true then
+				if #consoleStack > console.conf.sizeMax then
+					-- Move the stack up.
+					consoleStackShift = math.min(math.min(#consoleStack - console.conf.sizeMax, console.conf.stackMax), consoleStackShift + 1)
+				end
+			end
+		elseif key == console.conf.keys.scrollDown then
+			if consoleActive == true then
+				-- Move the stack down.
+				consoleStackShift = math.max(0, consoleStackShift - 1)
 			end
 		end
 	end
@@ -212,7 +282,7 @@ end
 
 -- Send text input to the console input field.
 function console.textinput(s)
-	if consoleStatus == true and consoleActive == true then
+	if consoleStatus == true and consoleActive == true and s ~= "" then
 		consoleInput = consoleInput .. s
 	end
 end
@@ -223,14 +293,14 @@ loaded, chunk = pcall(love.filesystem.load, "console.conf.lua")
 if not loaded then
 	print("[Console] Failed to load the configuration file due to the following error: " .. tostring(chunk))
 	consoleStatus, consoleActive = false, false
-	consoleStatusMessage = message
+	consoleStatusError = message
 else
 	loaded, message = pcall(chunk)
 
 	if not loaded then
 		print("[Console] Executing the configuration file returned the following error: " .. tostring(message))
 		consoleStatus, consoleActive = false, false
-		consoleStatusMessage = message
+		consoleStatusError = message
 	else
 		-- The file was loaded correctly.
 		consoleStatus = true
@@ -252,3 +322,28 @@ else
 		end
 	end
 end
+
+-- We wrap functions in a custom callback.
+console.addCommand("hello", function() console.print("Hello user!") end, "Greets you in a non rude way.")
+console.addCommand("clear", function() console.clear() end, "Clears the entire console.")
+
+-- Command callbacks can also receive a table of string arguments.
+console.addCommand("print", function(args)
+	if args then
+		console.print(table.concat(args, " "))
+	else
+		-- Error is returned to the console. In case of console.execute, error is returned to the "out" variable.
+		error("Missing required arguments")
+	end
+end, "Prints out a supplied string argument.")
+
+console.addCommand("help", function()
+	console.print("Available commands are:")
+	for k, v in pairs(consoleCommands) do
+		if v.description ~= "" then
+			console.print(string.format("%s -- %s", k, v.description), {r = 0, g = 255, b = 0})
+		else
+			console.print(k, {r = 0, g = 255, b = 0})
+		end
+	end
+end, "Outputs the names and descriptions of all available console commands.")
