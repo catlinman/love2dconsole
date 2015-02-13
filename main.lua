@@ -7,7 +7,7 @@ function love.load()
 	console.toggle(true) -- Toggle the console on.
 
 	-- Example of printing to the console with custom colors.
-	console.print("You are running LOVEConsole Version 0.1", {r = 0, g = 150, b = 255, a = 255})
+	console.print("You are running LOVEConsole Version 0.2", {r = 0, g = 150, b = 255, a = 255})
 end
 
 function love.draw()
