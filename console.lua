@@ -106,21 +106,23 @@ end
 -- Console functions that can be called outside of console.lua
 -- Toggle the console.
 function console.toggle(state)
-	if not state then
-		if consoleActive == false then
+	if console.conf.enabled == true then
+		if not state then
+			if consoleActive == false then
+				consoleActive = true
+			else
+				consoleActive = false
+			end
+		elseif state == true then -- The console state was specified. Set the console to the desired state.
 			consoleActive = true
 		else
 			consoleActive = false
 		end
-	elseif state == true then -- The console state was specified. Set the console to the desired state.
-		consoleActive = true
-	else
-		consoleActive = false
-	end
 
-	if consoleActive == true then
-		-- The console was opened and the errors were seen. Remove the outside widget.
-		warningCount, errorCount = 0, 0
+		if consoleActive == true then
+			-- The console was opened and the errors were seen. Remove the outside widget.
+			warningCount, errorCount = 0, 0
+		end
 	end
 end
 
@@ -272,11 +274,11 @@ function console.draw()
 
 			-- Show scroll arrows if there are more lines to display.
 			if consoleStackShift ~= math.min(#consoleStack - console.conf.sizeMax, console.conf.stackMax) then
-				love.graphics.printf(">", screenWidth - console.conf.consoleMarginEdge * 4.5, console.conf.consoleMarginTop + console.conf.fontSize, 1, "right", -math.pi / 2)
+				love.graphics.printf(console.conf.scrollChar, screenWidth - console.conf.consoleMarginEdge, console.conf.consoleMarginTop, 1, "right")
 			end
 
 			if consoleStackShift ~= 0 then
-				love.graphics.printf(">", screenWidth - console.conf.consoleMarginEdge * 1.5, console.conf.consoleMarginTop + (console.conf.lineSpacing * console.conf.sizeMax) + ((console.conf.sizeMax + 1) * console.conf.fontSize), 1, "right", math.pi / 2)
+				love.graphics.printf(console.conf.scrollChar, screenWidth - console.conf.consoleMarginEdge, console.conf.consoleMarginTop + (console.conf.lineSpacing * console.conf.sizeMax) + (console.conf.sizeMax * console.conf.fontSize), 1, "right")
 			end
 		end
 
@@ -305,7 +307,7 @@ function console.draw()
 
 		-- Draw the input line.
 		love.graphics.setColor(console.conf.colors["input"].r, console.conf.colors["input"].g, console.conf.colors["input"].b, console.conf.colors["input"].a)
-		love.graphics.print("> " ..consoleInput, console.conf.consoleMarginEdge,console.conf.consoleMarginTop +
+		love.graphics.print(string.format("%s %s", console.conf.inputChar, consoleInput), console.conf.consoleMarginEdge,console.conf.consoleMarginTop +
 			(console.conf.lineSpacing * math.max(math.min(consoleStackCount, console.conf.sizeMax) + 1, 1)) +
 			(math.min(consoleStackCount, console.conf.sizeMax) * console.conf.fontSize)
 		)
@@ -337,11 +339,11 @@ function console.draw()
 
 			-- Draw the warning count.
 			love.graphics.setColor(console.conf.colors["warning"].r, console.conf.colors["warning"].g, console.conf.colors["warning"].b, console.conf.colors["warning"].a)
-			love.graphics.printf(math.min(9999, warningCount), (console.conf.consoleMarginEdge / 1.25 * console.conf.fontSize / 2), console.conf.fontSize / 6, 3, "center")
+			love.graphics.printf(math.min(9999, warningCount), console.conf.outlineSize + (width / 5 + console.conf.fontSize / 2), console.conf.outlineSize + (console.conf.fontSize / 6), 2, "center")
 
 			-- Draw the error count.
 			love.graphics.setColor(console.conf.colors["error"].r, console.conf.colors["error"].g, console.conf.colors["error"].b, console.conf.colors["error"].a)
-			love.graphics.printf(math.min(9999, errorCount), width - (console.conf.consoleMarginEdge / 1.25 * console.conf.fontSize / 2), console.conf.fontSize / 6, 3, "center")
+			love.graphics.printf(math.min(9999, errorCount), width + console.conf.outlineSize - (width / 5 + console.conf.fontSize / 2), console.conf.outlineSize + (console.conf.fontSize / 6), 2, "center")
 		end
 	end
 end
@@ -359,20 +361,23 @@ function console.keypressed(key)
 
 		elseif consoleActive == true then
 			if key == "return" then
-				-- Store the line in the stack.
-				if #consoleInputStack > console.conf.stackMax then
-					table.remove(consoleInputStack, 1)
+				if consoleInput ~= "" then
+					-- Store the line in the stack.
+					if #consoleInputStack > console.conf.stackMax then
+						table.remove(consoleInputStack, 1)
+					end
+
+					consoleInputStack[#consoleInputStack + 1] = consoleInput
+					consoleInputStackCount = #consoleInputStack
+
+					-- Execute the given string command and reset the input field.
+					console.perform(consoleInput)
+					consoleInput = ""
+
+					-- Also reset the stack shift.
+					consoleStackShift = 0
+					consoleInputStackShift = 0
 				end
-
-				consoleInputStack[#consoleInputStack + 1] = consoleInput
-				consoleInputStackCount = #consoleInputStack
-
-				-- Execute the given string command and reset the input field.
-				console.perform(consoleInput)
-				consoleInput = ""
-
-				-- Also reset the stack shift.
-				consoleInputStackShift = 0
 
 			elseif key == "backspace" then
 				consoleInput = string.gsub(consoleInput, "[^\128-\191][\128-\191]*$", "")
@@ -492,6 +497,7 @@ end, "Executes the supplied lua function - Arguments: [lua command to execute] -
 console.addCommand("set", function(args)
 	if args then
 		assert(loadstring(string.format('%s', table.concat(args, " "))))()
+		console.print("Variable entry set")
 	else
 		console.print("Missing the argument lua code to set")
 	end

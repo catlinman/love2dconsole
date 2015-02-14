@@ -5,9 +5,11 @@
 console.conf.enabled = true -- If true the user is able to show/hide the console.
 console.conf.alert = true -- If true the console will display a widget on warnings and errors.
 
+console.conf.inputChar = ">" -- Characters displayed at the start of the input line.
+console.conf.scrollChar = "..." -- Scroll handle characters.
 console.conf.fontName = "" -- Filename of the font to be used. Leave it blank to use the default font.
 console.conf.fontSize = 10 -- Size of the console font.
-console.conf.consoleMarginEdge = 4 -- Left border margin of the console text.
+console.conf.consoleMarginEdge = 5 -- Left border margin of the console text.
 console.conf.consoleMarginTop = 0 -- Top border margin of the console text.
 console.conf.lineSpacing = 4 -- Space between individual lines.
 console.conf.outlineSize = 1 -- Outline height at the bottom of the console.
