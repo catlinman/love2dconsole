@@ -7,6 +7,7 @@ console.conf.alert = true -- If true the console will display a widget on warnin
 
 console.conf.inputChar = ">" -- Characters displayed at the start of the input line.
 console.conf.scrollChar = "..." -- Scroll handle characters.
+console.conf.cursorSpeed = 2 -- Speed at which the cursor blinks.
 console.conf.fontName = "" -- Filename of the font to be used. Leave it blank to use the default font.
 console.conf.fontSize = 10 -- Size of the console font.
 console.conf.consoleMarginEdge = 5 -- Left border margin of the console text.
@@ -26,6 +27,8 @@ console.conf.keys.scrollTop = "home" -- Key used to move to the top of the stack
 console.conf.keys.scrollBottom = "end" -- Key used to move to the bottom of the stack.
 console.conf.keys.inputUp = "up" -- Cycle up through the stack of last used commands.
 console.conf.keys.inputDown = "down" -- Cycle down through the stack of last used commands.
+console.conf.keys.cursorLeft = "left" -- Move the input cursor to the left.
+console.conf.keys.cursorRight = "right" -- Move the input cursor to the right.
 
 -- Color tables used by the console. Change these to style the console to your liking.
 -- Background color of the console window.

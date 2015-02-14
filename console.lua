@@ -7,8 +7,8 @@
 
 	This file allows for in-application executing and handling of function and variables allowing for more flexibility while debugging.
 
-	Feel free to modify the file to your liking as long as I am credited for the original work. For more information please
-	refer to the following link:
+	Feel free to modify the file to your liking as long as I am credited for the original work.
+	For more information please refer to the following link:
 
 	-> https://github.com/Catlinman/LOVEConsole/blob/master/LICENSE.md
 	
@@ -31,6 +31,7 @@ local consoleCommands = {} -- Table containing command callbacks.
 local consoleInput = "" -- String containing a user entered string command.
 local consoleActive = false -- If true the console will be shown.
 local consoleStatus = "" -- Variable holding the last fatal error message.
+local consoleCursorIndex = 0 -- Index of the input movement cursor.
 
 local consoleStack = {} -- Table containing the console printed lines.
 local consoleStackCount = 0 -- Current number of lines the console should accommodate for.
@@ -64,6 +65,21 @@ function string.split(str, delim)
 	result[nb + 1] = string.sub(str, lastPos)
 
 	return result
+end
+
+-- Insert a string into another string.
+function string.insert(s1, s2, pos)
+	return string.sub(s1, 1, pos) ..s2 ..string.sub(s1, pos + 1, #s1)
+end
+
+-- Drop a character a certain position.
+function string.pop(str, pos)
+	return string.sub(str, 1, pos) ..string.sub(str, pos + 2, #str)
+end
+
+-- Remove all UTF8 characters from a string.
+function string.stripUTF8(str)
+	return str:gsub('[%z\1-\127\194-\244][\128-\191]*', function(c) return #c > 1 and "" end)
 end
 
 -- Range iterator function.
@@ -306,8 +322,15 @@ function console.draw()
 		end
 
 		-- Draw the input line.
+		local consoleInputEdited = consoleInput
+		if math.ceil(os.clock() * console.conf.cursorSpeed) % 2 == 0 then
+			consoleInputEdited = string.insert(consoleInput ,"|", consoleCursorIndex)
+		else
+			consoleInputEdited = string.insert(consoleInput ," ", consoleCursorIndex)
+		end
+
 		love.graphics.setColor(console.conf.colors["input"].r, console.conf.colors["input"].g, console.conf.colors["input"].b, console.conf.colors["input"].a)
-		love.graphics.print(string.format("%s %s", console.conf.inputChar, consoleInput), console.conf.consoleMarginEdge,console.conf.consoleMarginTop +
+		love.graphics.print(string.format("%s %s", console.conf.inputChar, consoleInputEdited), console.conf.consoleMarginEdge,console.conf.consoleMarginTop +
 			(console.conf.lineSpacing * math.max(math.min(consoleStackCount, console.conf.sizeMax) + 1, 1)) +
 			(math.min(consoleStackCount, console.conf.sizeMax) * console.conf.fontSize)
 		)
@@ -377,10 +400,17 @@ function console.keypressed(key)
 					-- Also reset the stack shift.
 					consoleStackShift = 0
 					consoleInputStackShift = 0
+
+					-- Reset the cursor index
+					consoleCursorIndex = 0
 				end
 
 			elseif key == "backspace" then
-				consoleInput = string.gsub(consoleInput, "[^\128-\191][\128-\191]*$", "")
+				consoleInput = string.pop(consoleInput, consoleCursorIndex - 1)
+				consoleCursorIndex = math.max(consoleCursorIndex - 1, 0)
+
+			elseif key == "delete" then
+				consoleInput = string.pop(consoleInput, consoleCursorIndex)
 
 			elseif key == console.conf.keys.scrollUp then
 				if #consoleStack > console.conf.sizeMax then
@@ -390,7 +420,7 @@ function console.keypressed(key)
 
 			elseif key == console.conf.keys.scrollDown then
 				-- Move the stack down.
-				consoleStackShift = math.max(0, consoleStackShift - 1)
+				consoleStackShift = math.max(consoleStackShift - 1, 0)
 			
 			elseif key == console.conf.keys.scrollTop then
 				-- Make sure that we can actually scroll and if so, move the stack shift to show the top most line.
@@ -402,6 +432,18 @@ function console.keypressed(key)
 				-- Set the shift amount to zero so the newest line is the last.
 				consoleStackShift = 0
 
+			elseif key == console.conf.keys.scrollUp then
+				if #consoleStack > console.conf.sizeMax then
+					-- Move the stack up.
+					consoleStackShift = math.min(math.min(#consoleStack - console.conf.sizeMax, console.conf.stackMax), consoleStackShift + 1)
+				end
+
+			elseif key == console.conf.keys.cursorLeft then
+				consoleCursorIndex = math.max(consoleCursorIndex - 1, 0)
+
+			elseif key == console.conf.keys.cursorRight then
+				consoleCursorIndex = math.min(consoleCursorIndex + 1, #consoleInput)
+
 			elseif key == console.conf.keys.inputUp then
 				consoleInputStackShift = math.min(consoleInputStackShift + 1, #consoleInputStack)
 
@@ -409,6 +451,8 @@ function console.keypressed(key)
 				if entry then
 					consoleInput = entry
 				end
+
+				consoleCursorIndex = #consoleInput
 
 			elseif key == console.conf.keys.inputDown then
 				consoleInputStackShift = math.max(consoleInputStackShift - 1, 0)
@@ -419,6 +463,8 @@ function console.keypressed(key)
 				else
 					consoleInput = ""
 				end
+
+				consoleCursorIndex = 0
 			end
 		end
 	end
@@ -427,13 +473,16 @@ end
 -- Send text input to the console input field.
 function console.textinput(s)
 	if console.conf.enabled == true and consoleActive == true and s ~= "" then
-		consoleInput = consoleInput .. s
+		-- Insert the character and clean out all UTF8 characters since they break everything otherwise.
+		consoleInput = string.insert(consoleInput, string.stripUTF8(s), consoleCursorIndex)
+		consoleCursorIndex = math.min(#consoleInput, consoleCursorIndex + 1)
 	end
 end
 
 -- Execute the configuration file and initialize user consoleCommands.
 local loaded, chunk, message
 loaded, chunk = pcall(love.filesystem.load, "console.conf.lua")
+
 if not loaded then
 	print("[Console] Failed to load the configuration file due to the following error: " .. tostring(chunk))
 	console.conf.enabled, consoleActive, consoleStatus = false, false, message
@@ -503,7 +552,7 @@ console.addCommand("set", function(args)
 	end
 end, "Sets a supplied variable - Arguments: [lua assignment to execute] - Example: 'console.enabled = false'")
 
-
+-- Amazing help command of doom. It helps people.
 console.addCommand("help", function(args)
 	if not args then
 		console.print("Available commands are:")
