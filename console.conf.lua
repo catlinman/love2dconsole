@@ -7,7 +7,7 @@ console.conf.alert = true -- If true the console will display a widget on warnin
 
 console.conf.fontName = "" -- Filename of the font to be used. Leave it blank to use the default font.
 console.conf.fontSize = 10 -- Size of the console font.
-console.conf.consoleMarginLeft = 4 -- Left border margin of the console text.
+console.conf.consoleMarginEdge = 4 -- Left border margin of the console text.
 console.conf.consoleMarginTop = 0 -- Top border margin of the console text.
 console.conf.lineSpacing = 4 -- Space between individual lines.
 console.conf.outlineSize = 1 -- Outline height at the bottom of the console.
@@ -22,6 +22,8 @@ console.conf.keys.scrollUp = "pageup" -- Key used to scroll up within the consol
 console.conf.keys.scrollDown = "pagedown" -- Key used to scroll down within the console's message stack.
 console.conf.keys.scrollTop = "home" -- Key used to move to the top of the stack.
 console.conf.keys.scrollBottom = "end" -- Key used to move to the bottom of the stack.
+console.conf.keys.inputUp = "up" -- Cycle up through the stack of last used commands.
+console.conf.keys.inputDown = "down" -- Cycle down through the stack of last used commands.
 
 -- Color tables used by the console. Change these to style the console to your liking.
 -- Background color of the console window.

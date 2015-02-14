@@ -34,14 +34,18 @@ local consoleStatus = "" -- Variable holding the last fatal error message.
 
 local consoleStack = {} -- Table containing the console printed lines.
 local consoleStackCount = 0 -- Current number of lines the console should accommodate for.
-local consoleStackShift = 0 -- Amount of lines to shift the output by.
+local consoleStackShift = 0 -- Amount of lines to shift the output stack by.
+
+local consoleInputStack = {} -- Table containing the last user inputs. Has the same size as the main stack.
+local consoleInputStackCount = 0 -- Number of input lines in the stack.
+local consoleInputStackShift = 0 -- Amount of lines to shift the input stack by.
 
 local warningCount, errorCount = 0, 0 -- Track the number of unchecked errors and warnings.
 
 local screenWidth, screenHeight = love.graphics.getDimensions() -- Store the screen size.
 
 -- String splitting function.
-local function split(str, delim)
+function string.split(str, delim)
 	if string.find(str, delim) == nil then
 		return {str}
 	end
@@ -180,7 +184,7 @@ end
 
 -- Tell the console to execute a command from a string argument.
 function console.execute(line)
-	local arguments = split(line, " ")
+	local arguments = string.split(line, " ")
 	local command = arguments[1]
 
 	-- Remove the command argument from the argument table
@@ -244,6 +248,19 @@ function console.draw()
 			console.conf.outlineSize
 		)
 
+		if #consoleStack > console.conf.sizeMax then
+			love.graphics.setColor(console.conf.colors["text"].r, console.conf.colors["text"].g, console.conf.colors["text"].b, console.conf.colors["text"].a)
+
+			-- Show scroll arrows if there are more lines to display.
+			if consoleStackShift ~= math.min(#consoleStack - console.conf.sizeMax, console.conf.stackMax) then
+				love.graphics.printf(">", screenWidth - console.conf.consoleMarginEdge * 4.5, console.conf.consoleMarginTop + console.conf.fontSize, 1, "right", -math.pi / 2)
+			end
+
+			if consoleStackShift ~= 0 then
+				love.graphics.printf(">", screenWidth - console.conf.consoleMarginEdge * 1.5, console.conf.consoleMarginTop + (console.conf.lineSpacing * console.conf.sizeMax) + ((console.conf.sizeMax + 1) * console.conf.fontSize), 1, "right", math.pi / 2)
+			end
+		end
+
 		-- Draw the message stack with the message coloring.
 		for i in range(math.min(console.conf.sizeMax, #consoleStack)) do
 			local entry = consoleStack[math.max(1, (#consoleStack - math.min(console.conf.sizeMax, #consoleStack) + i - consoleStackShift))]
@@ -264,12 +281,12 @@ function console.draw()
 				love.graphics.setColor(console.conf.colors["text"].r, console.conf.colors["text"].g, console.conf.colors["text"].b, console.conf.colors["text"].a)
 			end
 
-			love.graphics.print(tostring(entry.message), console.conf.consoleMarginLeft, console.conf.consoleMarginTop + (console.conf.lineSpacing * i) + ((i - 1) * console.conf.fontSize))
+			love.graphics.print(tostring(entry.message), console.conf.consoleMarginEdge, console.conf.consoleMarginTop + (console.conf.lineSpacing * i) + ((i - 1) * console.conf.fontSize))
 		end
 
 		-- Draw the input line.
 		love.graphics.setColor(console.conf.colors["input"].r, console.conf.colors["input"].g, console.conf.colors["input"].b, console.conf.colors["input"].a)
-		love.graphics.print("> " ..consoleInput, console.conf.consoleMarginLeft,console.conf.consoleMarginTop +
+		love.graphics.print("> " ..consoleInput, console.conf.consoleMarginEdge,console.conf.consoleMarginTop +
 			(console.conf.lineSpacing * math.max(math.min(consoleStackCount, console.conf.sizeMax) + 1, 1)) +
 			(math.min(consoleStackCount, console.conf.sizeMax) * console.conf.fontSize)
 		)
@@ -291,41 +308,63 @@ function console.keypressed(key)
 			screenWidth, screenHeight = love.graphics.getDimensions()
 			console.toggle()
 
-		elseif key == "return" then
-			if consoleActive == true then
+		elseif consoleActive == true then
+			if key == "return" then
+				-- Store the line in the stack.
+				if #consoleInputStack > console.conf.stackMax then
+					table.remove(consoleInputStack, 1)
+				end
+
+				consoleInputStack[#consoleInputStack + 1] = consoleInput
+				consoleInputStackCount = #consoleInputStack
+
+				-- Execute the given string command and reset the input field.
 				console.execute(consoleInput)
 				consoleInput = ""
-			end
 
-		elseif key == "backspace" then
-			if consoleActive == true then
+				-- Also reset the stack shift.
+				consoleInputStackShift = 0
+
+			elseif key == "backspace" then
 				consoleInput = string.gsub(consoleInput, "[^\128-\191][\128-\191]*$", "")
-			end
 
-		elseif key == console.conf.keys.scrollUp then
-			if consoleActive == true then
+			elseif key == console.conf.keys.scrollUp then
 				if #consoleStack > console.conf.sizeMax then
 					-- Move the stack up.
 					consoleStackShift = math.min(math.min(#consoleStack - console.conf.sizeMax, console.conf.stackMax), consoleStackShift + 1)
 				end
-			end
 
-		elseif key == console.conf.keys.scrollDown then
-			if consoleActive == true then
+			elseif key == console.conf.keys.scrollDown then
 				-- Move the stack down.
 				consoleStackShift = math.max(0, consoleStackShift - 1)
-			end
-		
-		elseif key == console.conf.keys.scrollTop then
-			if consoleActive == true then
+			
+			elseif key == console.conf.keys.scrollTop then
+				-- Make sure that we can actually scroll and if so, move the stack shift to show the top most line.
 				if #consoleStack > console.conf.sizeMax then
 					consoleStackShift = math.min(#consoleStack - console.conf.sizeMax, console.conf.stackMax)
 				end
-			end
 
-		elseif key == console.conf.keys.scrollBottom then
-			if consoleActive == true then
+			elseif key == console.conf.keys.scrollBottom then
+				-- Set the shift amount to zero so the newest line is the last.
 				consoleStackShift = 0
+
+			elseif key == console.conf.keys.inputUp then
+				consoleInputStackShift = math.min(consoleInputStackShift + 1, #consoleInputStack)
+
+				local entry = consoleInputStack[#consoleInputStack - consoleInputStackShift + 1]
+				if entry then
+					consoleInput = entry
+				end
+
+			elseif key == console.conf.keys.inputDown then
+				consoleInputStackShift = math.max(consoleInputStackShift - 1, 0)
+
+				local entry = consoleInputStack[#consoleInputStack - consoleInputStackShift + 1]
+				if consoleInputStackShift ~= 0 then
+					consoleInput = entry
+				else
+					consoleInput = ""
+				end
 			end
 		end
 	end
@@ -417,4 +456,3 @@ console.addCommand("help", function()
 		end
 	end
 end, "Outputs the names and descriptions of all available console commands.")
-
