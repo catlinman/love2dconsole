@@ -460,11 +460,11 @@ function console.keypressed(key)
 				local entry = consoleInputStack[#consoleInputStack - consoleInputStackShift + 1]
 				if consoleInputStackShift ~= 0 then
 					consoleInput = entry
+					consoleCursorIndex = #consoleInput
 				else
 					consoleInput = ""
+					consoleCursorIndex = 0
 				end
-
-				consoleCursorIndex = 0
 			end
 		end
 	end

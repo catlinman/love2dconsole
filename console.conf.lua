@@ -7,7 +7,7 @@ console.conf.alert = true -- If true the console will display a widget on warnin
 
 console.conf.inputChar = ">" -- Characters displayed at the start of the input line.
 console.conf.scrollChar = "..." -- Scroll handle characters.
-console.conf.cursorSpeed = 2 -- Speed at which the cursor blinks.
+console.conf.cursorSpeed = 1.5 -- Speed at which the cursor blinks.
 console.conf.fontName = "" -- Filename of the font to be used. Leave it blank to use the default font.
 console.conf.fontSize = 10 -- Size of the console font.
 console.conf.consoleMarginEdge = 5 -- Left border margin of the console text.
