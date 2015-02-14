@@ -37,7 +37,7 @@ console.conf.colors["background"] = {
 -- Color of the console outline.
 console.conf.colors["outline"] = {
 	r = 0,
-	g = 200,
+	g = 128,
 	b = 0,
 	a = 255
 }
@@ -66,6 +66,14 @@ console.conf.colors["error"] = {
 	a = 255
 }
 
+-- Color of error messages.
+console.conf.colors["success"] = {
+	r = 0,
+	g = 255,
+	b = 0,
+	a = 255
+}
+
 -- Color of the console's input field.
 console.conf.colors["input"] = {
 	r = 255,
@@ -82,4 +90,4 @@ console.addCommand("hello", function(args)
 	else
 		console.print("Hey there!")
 	end
-end, "Greets you in a non rude way.")
+end, "Greets you in a non rude way - Arguments: [person to say hello to]")

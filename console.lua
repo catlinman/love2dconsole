@@ -144,7 +144,18 @@ function console.warning(message)
 	if console.conf.enabled == true then
 		if message ~= nil then
 			warningCount = warningCount + 1
-			stackpush(message, "warning")
+			stackpush("Warning: " ..message, "warning")
+		else
+			stackpush("Please supply a value before sending a warning message to the console.", "warning")
+		end
+	end
+end
+
+-- Print a string to the console with success styling.
+function console.success(message)
+	if console.conf.enabled == true then
+		if message ~= nil then
+			stackpush("Success: " ..message, "success")
 		else
 			stackpush("Please supply a value before sending a warning message to the console.", "warning")
 		end
@@ -156,7 +167,7 @@ function console.error(message)
 	if console.conf.enabled == true then
 		if message ~= nil then
 			errorCount = errorCount + 1
-			stackpush(message, "error")
+			stackpush("Error: " ..message, "error")
 		else
 			stackpush("Please supply a value before sending an error message to the console.", "warning")
 		end
@@ -182,8 +193,8 @@ function console.removeCommand(name)
 	end
 end
 
--- Tell the console to execute a command from a string argument.
-function console.execute(line)
+-- Tell the console to perform a command from a string argument.
+function console.perform(line)
 	local arguments = string.split(line, " ")
 	local command = arguments[1]
 
@@ -226,9 +237,15 @@ end
 -- Draw the console and it's contents.
 function console.draw()
 	if console.conf.enabled == true and consoleActive == true then
-		love.graphics.setFont(consoleFont)
+		-- Reset graphic changes to avoid weird things from happening.
+		love.graphics.translate(0, 0)
+		love.graphics.rotate(0)
+		love.graphics.scale(1, 1)
 
-		love.graphics.setColor(console.conf.colors.background.r, console.conf.colors.background.g, console.conf.colors.background.b, console.conf.colors.background.a)
+		love.graphics.setFont(consoleFont) -- Prepare the console font.
+
+		-- Draw the console background.
+		love.graphics.setColor(console.conf.colors["background"].r, console.conf.colors["background"].g, console.conf.colors["background"].b, console.conf.colors["background"].a)
 		love.graphics.rectangle(
 			"fill",
 			0,
@@ -238,6 +255,7 @@ function console.draw()
 				(math.max(math.min(consoleStackCount, console.conf.sizeMax), console.conf.sizeMin - 1) * console.conf.fontSize)
 		)
 
+		-- Draw the console outline.
 		love.graphics.setColor(console.conf.colors["outline"].r, console.conf.colors["outline"].g, console.conf.colors["outline"].b, console.conf.colors["outline"].a)
 		love.graphics.rectangle(
 			"fill",
@@ -248,6 +266,7 @@ function console.draw()
 			console.conf.outlineSize
 		)
 
+		-- Draw the scroll indicators.
 		if #consoleStack > console.conf.sizeMax then
 			love.graphics.setColor(console.conf.colors["text"].r, console.conf.colors["text"].g, console.conf.colors["text"].b, console.conf.colors["text"].a)
 
@@ -294,6 +313,36 @@ function console.draw()
 		-- Reset the color and font in case someone decides to do drawing after the console (which doesn't make sense but who cares).
 		love.graphics.setColor(255, 255, 255, 255)
 		love.graphics.setFont(baseFont)
+
+	elseif console.conf.enabled == true and console.conf.alert == true and consoleActive == false then
+		-- Once more reset graphic changes.
+		love.graphics.translate(0, 0)
+		love.graphics.rotate(0)
+		love.graphics.scale(1, 1)
+
+		love.graphics.setFont(consoleFont) -- Prepare the console font.
+
+		-- Draw the information widgets if the console is hidden and there are warnings and or errors.
+		if warningCount > 0 or errorCount > 0 then
+			local width = 6 * console.conf.fontSize
+			local height = console.conf.fontSize * 1.5
+
+			-- Draw the box outline border.
+			love.graphics.setColor(console.conf.colors["outline"].r, console.conf.colors["outline"].g, console.conf.colors["outline"].b, console.conf.colors["outline"].a)
+			love.graphics.rectangle("fill", 0, 0, width + console.conf.outlineSize * 2, height + console.conf.outlineSize * 2)
+
+			-- Draw the box background.
+			love.graphics.setColor(console.conf.colors["background"].r, console.conf.colors["background"].g, console.conf.colors["background"].b, console.conf.colors["background"].a)
+			love.graphics.rectangle("fill", console.conf.outlineSize, console.conf.outlineSize, width, height)
+
+			-- Draw the warning count.
+			love.graphics.setColor(console.conf.colors["warning"].r, console.conf.colors["warning"].g, console.conf.colors["warning"].b, console.conf.colors["warning"].a)
+			love.graphics.printf(math.min(9999, warningCount), (console.conf.consoleMarginEdge / 1.25 * console.conf.fontSize / 2), console.conf.fontSize / 6, 3, "center")
+
+			-- Draw the error count.
+			love.graphics.setColor(console.conf.colors["error"].r, console.conf.colors["error"].g, console.conf.colors["error"].b, console.conf.colors["error"].a)
+			love.graphics.printf(math.min(9999, errorCount), width - (console.conf.consoleMarginEdge / 1.25 * console.conf.fontSize / 2), console.conf.fontSize / 6, 3, "center")
+		end
 	end
 end
 
@@ -319,7 +368,7 @@ function console.keypressed(key)
 				consoleInputStackCount = #consoleInputStack
 
 				-- Execute the given string command and reset the input field.
-				console.execute(consoleInput)
+				console.perform(consoleInput)
 				consoleInput = ""
 
 				-- Also reset the stack shift.
@@ -420,39 +469,71 @@ console.addCommand("print", function(args)
 		console.print(table.concat(args, " "))
 	else
 		-- Error is returned to the console. In case of console.execute, error is returned to the "out" variable.
-		error("Missing required arguments")
+		console.print("Missing required arguments")
 	end
-end, "Prints out the supplied arguments.")
+end, "Prints trailing command arguments as a formatted string - Arguments: [string to print]")
 
+-- Executes a lua command and prints it's return value to the console.
 console.addCommand("run", function(args)
 	if args then
-		func = args[1]
-		table.remove(args, 1)
-		assert(loadstring(string.format('return %s(%s)', func, table.concat(args, " "))))()
-	else
-		-- Error is returned to the console. In case of console.execute, error is returned to the "out" variable.
-		error("Missing required arguments")
-	end
-end, "Executes the supplied lua function.")
+		local value = assert(loadstring(string.format("return %s", table.concat(args, " "))))()
 
+		if value then
+			console.print(string.format("Returned %s", tostring(value)))
+		else
+			console.print(string.format("Executing %s returned nil", table.concat(args, " ")))
+		end
+	else
+		console.print("Missing the argument lua code to execute")
+	end
+end, "Executes the supplied lua function - Arguments: [lua command to execute] - Example: 'console.print(\"Do the fishstick!\")'")
+
+-- Same as run with the difference of not returning a value and so avoiding errors while assigning new values to variables.
 console.addCommand("set", function(args)
 	if args then
-		var = args[1]
-		table.remove(args, 1)
-		assert(loadstring(string.format('%s = %s', var, table.concat(args, " "))))()
+		assert(loadstring(string.format('%s', table.concat(args, " "))))()
 	else
-		-- Error is returned to the console. In case of console.execute, error is returned to the "out" variable.
-		error("Missing required arguments")
+		console.print("Missing the argument lua code to set")
 	end
-end, "Sets a supplied variable.")
+end, "Sets a supplied variable - Arguments: [lua assignment to execute] - Example: 'console.enabled = false'")
 
-console.addCommand("help", function()
-	console.print("Available commands are:")
-	for k, v in pairs(consoleCommands) do
-		if v.description ~= "" then
-			console.print(string.format("%s - %s", k, v.description), {r = 0, g = 255, b = 0})
+
+console.addCommand("help", function(args)
+	if not args then
+		console.print("Available commands are:")
+		for k, v in pairs(consoleCommands) do
+			if v.description ~= "" then
+				console.print(string.format("%s - %s", k, v.description), {r = 0, g = 255, b = 0})
+			else
+				console.print(k, {r = 0, g = 255, b = 0})
+			end
+		end
+	else
+		local name = table.concat(args, " ")
+		if consoleCommands[name] then
+			if consoleCommands[name].description then
+				console.print(string.format("%s - %s", name, consoleCommands[name].description), {r = 0, g = 255, b = 0})
+			else
+				console.print(string.format("The command with the name of '%s' does not have a description.", name))
+			end
 		else
-			console.print(k, {r = 0, g = 255, b = 0})
+			console.print(string.format("The command with the name of '%s' was not found in the command table.", name))
 		end
 	end
-end, "Outputs the names and descriptions of all available console commands.")
+end, "Outputs the names and descriptions of all available console commands or just a single one - Arguments: [command to fetch information on]")
+
+-- Creates a new command entry that points to another command.
+console.addCommand("alias", function(args)
+	if args then
+		if args[1] and args[2] then
+			if consoleCommands[args[1]] then
+				console.addCommand(args[2], consoleCommands[args[1]].callback, consoleCommands[args[1]].description)
+				console.print(string.format("Successfully assigned the alias of '%s' to the command of '%s'.", args[2], args[1]))
+			end
+		else
+			console.print("Missing command arguments. Requires two.")
+		end
+	else
+		console.print("Missing command arguments. Requires two.")
+	end
+end, "Creates a new command list entry mimicking another command. Arguments: [command to alias] [alias name]")
