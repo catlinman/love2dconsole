@@ -45,6 +45,12 @@ local warningCount, errorCount = 0, 0 -- Track the number of unchecked errors an
 
 local screenWidth, screenHeight = love.graphics.getDimensions() -- Store the screen size.
 
+-- Returns the current lua local path to this script.
+local function scriptPath()
+   local str = debug.getinfo(2, "S").source:sub(2)
+   return str:match("(.*/)") or ""
+end
+
 -- String splitting function.
 function string.split(str, delim)
 	if string.find(str, delim) == nil then
@@ -255,11 +261,6 @@ end
 -- Draw the console and it's contents.
 function console.draw()
 	if console.conf.enabled == true and consoleActive == true then
-		-- Reset graphic changes to avoid weird things from happening.
-		love.graphics.translate(0, 0)
-		love.graphics.rotate(0)
-		love.graphics.scale(1, 1)
-
 		love.graphics.setFont(consoleFont) -- Prepare the console font.
 
 		-- Draw the console background.
@@ -340,11 +341,6 @@ function console.draw()
 		love.graphics.setFont(baseFont)
 
 	elseif console.conf.enabled == true and console.conf.alert == true and consoleActive == false then
-		-- Once more reset graphic changes.
-		love.graphics.translate(0, 0)
-		love.graphics.rotate(0)
-		love.graphics.scale(1, 1)
-
 		love.graphics.setFont(consoleFont) -- Prepare the console font.
 
 		-- Draw the information widgets if the console is hidden and there are warnings and or errors.
@@ -481,7 +477,7 @@ end
 
 -- Execute the configuration file and initialize user consoleCommands.
 local loaded, chunk, message
-loaded, chunk = pcall(love.filesystem.load, "console.conf.lua")
+loaded, chunk = pcall(love.filesystem.load, scriptPath() .."console.conf.lua")
 
 if not loaded then
 	print("[Console] Failed to load the configuration file due to the following error: " .. tostring(chunk))
@@ -506,7 +502,7 @@ else
 		if not fontstatus then
 			print("[Console] Loading the custom defined console font returned the following error: " .. tostring(message) .." - reverting to the default font instead.")
 		else
-			consoleFont = font 
+			consoleFont = font
 		end
 	end
 end

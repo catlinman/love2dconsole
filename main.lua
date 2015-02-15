@@ -15,6 +15,8 @@ end
 
 function love.draw()
 	love.graphics.setBackgroundColor(10, 25, 50) -- Set a lame background.
+
+	-- Keep in mind to call love.graphics.pop() if you performed any translation changes using love.graphics.push()
 	console.draw() -- Draw the console at the end of the draw loop.
 end
 
