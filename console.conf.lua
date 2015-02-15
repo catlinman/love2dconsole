@@ -34,32 +34,32 @@ console.conf.keys.cursorRight = "right" -- Move the input cursor to the right.
 -- Background color of the console window.
 console.conf.colors["background"] = {
 	r = 0,
-	g = 0,
-	b = 0,
+	g = 43,
+	b = 54,
 	a = 255
 }
 
 -- Color of the console outline.
 console.conf.colors["outline"] = {
-	r = 0,
-	g = 128,
-	b = 0,
+	r = 88,
+	g = 110,
+	b = 117,
 	a = 255
 }
 
 -- Default console basic text color.
 console.conf.colors["text"] = {
-	r = 255,
-	g = 255,
-	b = 255,
+	r = 238,
+	g = 232,
+	b = 213,
 	a = 255
 }
 
 -- Color of warning messages.
 console.conf.colors["warning"] = {
-	r = 255,
-	g = 255,
-	b = 25,
+	r = 231,
+	g = 207,
+	b = 0,
 	a = 255
 }
 
@@ -73,17 +73,17 @@ console.conf.colors["error"] = {
 
 -- Color of error messages.
 console.conf.colors["success"] = {
-	r = 0,
-	g = 255,
+	r = 143,
+	g = 253,
 	b = 0,
 	a = 255
 }
 
 -- Color of the console's input field.
 console.conf.colors["input"] = {
-	r = 255,
-	g = 255,
-	b = 255,
+	r = 253,
+	g = 246,
+	b = 227,
 	a = 255
 }
 
