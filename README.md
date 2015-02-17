@@ -7,24 +7,26 @@ This is an in-application debugging and command console created for the [LÖVE2D
 Getting LOVEConsole to run is a fairly simple and straightforward task. All that needs to be done to get started is to put *console.lua* and *console.conf.lua* somewhere in you LÖVE2D project and to then *require* the *console.lua* file from your *main.lua*. It is suggested that you do it from there since LOVEConsole requires you to hook some of LÖVE's main functions to it. This way it can receive information like key presses and also draw at the end of the main draw loop.
 
 An example of how this can be done can either be seen in this repository's [*main.lua*](https://github.com/Catlinman/LOVEConsole/blob/master/main.lua) file or somewhat abstracted in the code below.
-	
-	require("console")
 
-	function love.draw()
-		-- [Do main drawing operations before drawing the console.]
-		love.graphics.pop() -- [Do this if you pushed any previous graphic translations.]
-		console.draw()
-	end
-	
-	function love.keypressed(key)
-		-- [Handle key presses and then pass these on to the console.]
-		console.keypressed(key)
-	end
-	
-	function love.textinput(t)
-		-- [Receive text input and pass it on to the console.]
-		console.textinput(t)
-	end
+```lua	
+require("console")
+
+function love.draw()
+	-- [Do main drawing operations before drawing the console.]
+	love.graphics.pop() -- [Do this if you pushed any previous graphic translations.]
+	console.draw()
+end
+
+function love.keypressed(key)
+	-- [Handle key presses and then pass these on to the console.]
+	console.keypressed(key)
+end
+
+function love.textinput(t)
+	-- [Receive text input and pass it on to the console.]
+	console.textinput(t)
+end
+```
 
 From there on you can run your application as your normally would. At this point while your application is running you can hit *F10* to bring up the console. This can be done assuming you are using the default key bindings and have not made any changes to the configuration file as explained in the next section. If you've gotten this far your console is pretty much ready to be used. If you want to take it even further you should check out the next section.
 
