@@ -1,13 +1,13 @@
 
 function love.conf(t)
     t.identity = nil
-    t.version = "0.9.1"
-    t.console = true
+    t.version = "0.9.2"
+    t.console = false
 
     t.window.title = "LOVEConsole"
     t.window.icon = nil
-    t.window.width = 1024
-    t.window.height = 768
+    t.window.width = 800
+    t.window.height = 600
     t.window.borderless = false
     t.window.resizable = false
     t.window.minwidth = 1
