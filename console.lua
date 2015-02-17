@@ -402,8 +402,10 @@ function console.keypressed(key)
 				end
 
 			elseif key == "backspace" then
-				consoleInput = string.pop(consoleInput, consoleCursorIndex - 1)
-				consoleCursorIndex = math.max(consoleCursorIndex - 1, 0)
+				if consoleCursorIndex ~= 0 then
+					consoleInput = string.pop(consoleInput, consoleCursorIndex - 1)
+					consoleCursorIndex = math.max(consoleCursorIndex - 1, 0)
+				end
 
 			elseif key == "delete" then
 				consoleInput = string.pop(consoleInput, consoleCursorIndex)
