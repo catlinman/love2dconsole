@@ -32,7 +32,7 @@ From there on you can run your application as your normally would. At this point
 
 ## Configuring the console ##
 
-With your *console.lua* file you will also find a file called *console.conf.lua*. This is where LOVEConsole gets it's configuration from and it is crucial that the configuration file contains all of it's default values as specified in this repositories config file. If this is not the case the console will not be able to run and simply deactivate itself on load.
+Inside your LOVEConsole folder you will also find a file called *console.conf.lua*. This is where LOVEConsole gets it's configuration from and it is crucial that the configuration file contains all of it's default values as specified in this repositories config file. If this is not the case the console will not be able to run and simply deactivate itself on load.
 
 You can open the configuration file with your favorite text editing program and modify it to your liking. I've done my best to comment each configuration variable's use so it should be easy to edit and obtain your own personalized console. I also suggest that you define your custom console commands at the end of this file. You will find a sample command at the bottom of the file to see how commands can be created with ease. The benefit of using already defined commands comes with the fact that you have a lot more control over what they do and they are faster to type and perform over a native lua command which can be executed using the *run* built-in console command (further on that in the next section).
 
