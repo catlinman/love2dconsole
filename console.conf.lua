@@ -2,37 +2,42 @@
 -- User configuration file for console.lua
 -- We keep this file separate since it mainly consists of defining variables.
 
-console.conf.enabled = true -- If true the user is able to show/hide the console.
-console.conf.alert = true -- If true the console will display a widget on warnings and errors.
+local conf = {} -- Table containing the settings returned to the main system.
 
-console.conf.inputChar = ">" -- Characters displayed at the start of the input line.
-console.conf.scrollChar = "..." -- Scroll handle characters.
-console.conf.cursorSpeed = 1.5 -- Speed at which the cursor blinks.
-console.conf.fontName = "" -- Filename of the font to be used. Leave it blank to use the default font.
-console.conf.fontSize = 10 -- Size of the console font.
-console.conf.consoleMarginEdge = 5 -- Left border margin of the console text.
-console.conf.consoleMarginTop = 0 -- Top border margin of the console text.
-console.conf.lineSpacing = 4 -- Space between individual lines.
-console.conf.outlineSize = 1 -- Outline height at the bottom of the console.
+conf.keys = {} -- Table containing the user defined keys.
+conf.colors = {} -- Table containing the console style colors.
 
-console.conf.stackMax = 100  -- Maximum number of lines stored in the console stack before old lines are removed.
-console.conf.sizeMin = 5 -- Minimum lines the console should display before extending to the max size.
-console.conf.sizeMax = 10 -- Maximum number of entries to print at a time.
-console.conf.shiftAmount = 1 -- Amount of lines to move over while scrolling up and down.
+conf.enabled = true -- If true the user is able to show/hide the console.
+conf.alert = true -- If true the console will display a widget on warnings and errors.
 
-console.conf.keys.toggle = "f10" -- Key used to toggle the console during runtime.
-console.conf.keys.scrollUp = "pageup" -- Key used to scroll up within the console's message stack.
-console.conf.keys.scrollDown = "pagedown" -- Key used to scroll down within the console's message stack.
-console.conf.keys.scrollTop = "home" -- Key used to move to the top of the stack.
-console.conf.keys.scrollBottom = "end" -- Key used to move to the bottom of the stack.
-console.conf.keys.inputUp = "up" -- Cycle up through the stack of last used commands.
-console.conf.keys.inputDown = "down" -- Cycle down through the stack of last used commands.
-console.conf.keys.cursorLeft = "left" -- Move the input cursor to the left.
-console.conf.keys.cursorRight = "right" -- Move the input cursor to the right.
+conf.inputChar = ">" -- Characters displayed at the start of the input line.
+conf.scrollChar = "..." -- Scroll handle characters.
+conf.cursorSpeed = 1.5 -- Speed at which the cursor blinks.
+conf.fontName = "" -- Filename of the font to be used. Leave it blank to use the default font.
+conf.fontSize = 10 -- Size of the console font.
+conf.consoleMarginEdge = 5 -- Left border margin of the console text.
+conf.consoleMarginTop = 0 -- Top border margin of the console text.
+conf.lineSpacing = 4 -- Space between individual lines.
+conf.outlineSize = 1 -- Outline height at the bottom of the console.
+
+conf.stackMax = 100  -- Maximum number of lines stored in the console stack before old lines are removed.
+conf.sizeMin = 5 -- Minimum lines the console should display before extending to the max size.
+conf.sizeMax = 25 -- Maximum number of entries to print at a time.
+conf.shiftAmount = 1 -- Amount of lines to move over while scrolling up and down.
+
+conf.keys.toggle = "f10" -- Key used to toggle the console during runtime.
+conf.keys.scrollUp = "pageup" -- Key used to scroll up within the console's message stack.
+conf.keys.scrollDown = "pagedown" -- Key used to scroll down within the console's message stack.
+conf.keys.scrollTop = "home" -- Key used to move to the top of the stack.
+conf.keys.scrollBottom = "end" -- Key used to move to the bottom of the stack.
+conf.keys.inputUp = "up" -- Cycle up through the stack of last used commands.
+conf.keys.inputDown = "down" -- Cycle down through the stack of last used commands.
+conf.keys.cursorLeft = "left" -- Move the input cursor to the left.
+conf.keys.cursorRight = "right" -- Move the input cursor to the right.
 
 -- Color tables used by the console. Change these to style the console to your liking.
 -- Background color of the console window.
-console.conf.colors["background"] = {
+conf.colors["background"] = {
 	r = 0,
 	g = 43,
 	b = 54,
@@ -40,7 +45,7 @@ console.conf.colors["background"] = {
 }
 
 -- Color of the console outline.
-console.conf.colors["outline"] = {
+conf.colors["outline"] = {
 	r = 88,
 	g = 110,
 	b = 117,
@@ -48,7 +53,7 @@ console.conf.colors["outline"] = {
 }
 
 -- Default console basic text color.
-console.conf.colors["text"] = {
+conf.colors["text"] = {
 	r = 238,
 	g = 232,
 	b = 213,
@@ -56,7 +61,7 @@ console.conf.colors["text"] = {
 }
 
 -- Color of warning messages.
-console.conf.colors["warning"] = {
+conf.colors["warning"] = {
 	r = 231,
 	g = 207,
 	b = 0,
@@ -64,7 +69,7 @@ console.conf.colors["warning"] = {
 }
 
 -- Color of error messages.
-console.conf.colors["error"] = {
+conf.colors["error"] = {
 	r = 255,
 	g = 75,
 	b = 75,
@@ -72,7 +77,7 @@ console.conf.colors["error"] = {
 }
 
 -- Color of error messages.
-console.conf.colors["success"] = {
+conf.colors["success"] = {
 	r = 143,
 	g = 253,
 	b = 0,
@@ -80,19 +85,11 @@ console.conf.colors["success"] = {
 }
 
 -- Color of the console's input field.
-console.conf.colors["input"] = {
+conf.colors["input"] = {
 	r = 253,
 	g = 246,
 	b = 227,
 	a = 255
 }
 
--- Declare custom commands at the end of this file.
--- Simple "Hello user" example command.
-console.addCommand("hello", function(args)
-	if args then
-		console.print(string.format("Greetings %s!", args[1]))
-	else
-		console.print("Hey there!")
-	end
-end, "Greets you in a non rude way - Arguments: [person to say hello to]")
+return conf

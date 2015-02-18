@@ -8,7 +8,7 @@ Getting LOVEConsole to run is a fairly simple and straightforward task. All that
 
 An example of how this can be done can either be seen in this repository's [*main.lua*](https://github.com/Catlinman/LOVEConsole/blob/master/main.lua) file or somewhat abstracted in the code below.
 	
-	require("console")
+	local console = require("console") -- Require the console script and assign it to a variable.
 
 	function love.draw()
 		-- [Do main drawing operations before drawing the console.]

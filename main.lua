@@ -1,16 +1,25 @@
 
 -- Example main file to show the console functionality.
 
-require("console") -- Require the console script.
+local console = require("console") -- Require the console script.
 
 function love.load()
-	-- console.toggle(true) -- Toggle the console on.
-
 	-- Example of printing to the console with custom colors.
 	console.print("You are running LOVEConsole by Catlinman", {r = 0, g = 150, b = 255, a = 255})
 	console.warning("Wow what a warning. Something is about to break.")
 	console.error("Many error very scare.")
 	console.success("User is spooked.")
+
+	-- We defined custom commands using the
+	-- Simple "Hello user" example command.
+	console.addCommand("hello", function(args)
+		if args then
+			console.print(string.format("Greetings %s!", args[1]))
+		else
+			console.print("Hey there!")
+		end
+	end, "Greets you in a non rude way - Arguments: [person to say hello to]")
+
 end
 
 function love.draw()
