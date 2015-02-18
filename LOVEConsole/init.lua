@@ -124,16 +124,16 @@ end
 -- Console functions that can be called outside of console.lua
 -- Toggle the console.
 function console.toggle(state)
-	if conf.enabled == true then
+	if conf.enabled then
 		if state ~= true and state ~= false then
 			consoleActive = not consoleActive
 
-		elseif state == true or state == false then
+		elseif state or state == false then
 			-- The console state was specified. Set the console to the desired state.
 			consoleActive = state
 		end
 
-		if consoleActive == true then
+		if consoleActive then
 			-- The console was opened and the errors were seen. Remove the outside widget.
 			warningCount, errorCount = 0, 0
 		end
@@ -142,7 +142,7 @@ end
 
 -- Print a string to the console. The optional color table must be defined as {r = v, g = v, b = v, a = v}.
 function console.print(message, color)
-	if conf.enabled == true then
+	if conf.enabled then
 		if message ~= nil then
 			if not color then
 				stackpush(message, "default")
@@ -157,7 +157,7 @@ end
 
 -- Print a string to the console with warning styling and add to the warning count.
 function console.warning(message)
-	if conf.enabled == true then
+	if conf.enabled then
 		if message ~= nil then
 			warningCount = warningCount + 1
 			stackpush("Warning: " ..message, "warning")
@@ -169,7 +169,7 @@ end
 
 -- Print a string to the console with success styling.
 function console.success(message)
-	if conf.enabled == true then
+	if conf.enabled then
 		if message ~= nil then
 			stackpush("Success: " ..message, "success")
 		else
@@ -180,7 +180,7 @@ end
 
 -- Print a string to the console with error styling  and add to the error count.
 function console.error(message)
-	if conf.enabled == true then
+	if conf.enabled then
 		if message ~= nil then
 			errorCount = errorCount + 1
 			stackpush("Error: " ..message, "error")
@@ -252,7 +252,7 @@ end
 -- These functions need to be called from main.lua
 -- Draw the console and it's contents.
 function console.draw()
-	if conf.enabled == true and consoleActive == true then
+	if conf.enabled and consoleActive then
 		love.graphics.setFont(consoleFont) -- Prepare the console font.
 
 		-- Draw the console background.
@@ -332,7 +332,7 @@ function console.draw()
 		love.graphics.setColor(255, 255, 255, 255)
 		love.graphics.setFont(baseFont)
 
-	elseif conf.enabled == true and conf.alert == true and consoleActive == false then
+	elseif conf.enabled and conf.alert and consoleActive == false then
 		love.graphics.setFont(consoleFont) -- Prepare the console font.
 
 		-- Draw the information widgets if the console is hidden and there are warnings and or errors.
@@ -364,13 +364,13 @@ love.keyboard.setKeyRepeat(true)
 
 -- Receive pressed keys and interpret them.
 function console.keypressed(key)
-	if conf.enabled == true then
+	if conf.enabled then
 		if key == conf.keys.toggle then
 			-- Update the screen size and display the console.
 			screenWidth, screenHeight = love.graphics.getDimensions()
 			console.toggle()
 
-		elseif consoleActive == true then
+		elseif consoleActive then
 			if key == "return" then
 				if consoleInput ~= "" then
 					-- Store the line in the stack.
@@ -462,7 +462,12 @@ end
 
 -- Send text input to the console input field.
 function console.textinput(s)
-	if conf.enabled == true and consoleActive == true and s ~= "" then
+	-- If the key is the toggle key and the ignoreToggleKey option is enabled, clear the input.
+	if conf.ignoreToggleKey and s == conf.keys.toggle then
+		s = ""
+	end
+
+	if conf.enabled and consoleActive and s ~= "" then
 		-- Insert the character and clean out all UTF8 characters since they break everything otherwise.
 		consoleInput = string.insert(consoleInput, string.stripUTF8(s), consoleCursorIndex)
 		consoleCursorIndex = math.min(#consoleInput, consoleCursorIndex + 1)

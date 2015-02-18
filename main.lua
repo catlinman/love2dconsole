@@ -1,7 +1,7 @@
 
 -- Example main file to show the console functionality.
 
-local console = require("console") -- Require the console script.
+local console = require("LOVEConsole") -- Require the console script.
 
 function love.load()
 	-- Example of printing to the console with custom colors.

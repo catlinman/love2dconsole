@@ -19,6 +19,7 @@ conf.consoleMarginEdge = 5 -- Left border margin of the console text.
 conf.consoleMarginTop = 0 -- Top border margin of the console text.
 conf.lineSpacing = 4 -- Space between individual lines.
 conf.outlineSize = 1 -- Outline height at the bottom of the console.
+conf.ignoreToggleKey = false -- If true, the toggle key will not be inputted to the console's input field.
 
 conf.stackMax = 100  -- Maximum number of lines stored in the console stack before old lines are removed.
 conf.sizeMin = 5 -- Minimum lines the console should display before extending to the max size.
