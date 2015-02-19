@@ -478,6 +478,11 @@ function console.textinput(s)
 	end
 end
 
+-- If the window is resized whilst the console is open, resize the console.
+function console.resize(w, h)
+	screenWidth, screenHeight = w, h
+end
+
 -- Execute the configuration file and initialize user consoleCommands.
 local loaded, data
 loaded, data = pcall(love.filesystem.load, scriptPath() .."config.lua")

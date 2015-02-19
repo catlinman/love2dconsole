@@ -36,3 +36,7 @@ end
 function love.textinput(t)
 	console.textinput(t) -- Send text input to the console.
 end
+
+function love.resize(w, h)
+	console.resize(w, h) -- Resize the console if the window is resized.
+end
