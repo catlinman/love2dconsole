@@ -30,6 +30,7 @@ end
 
 function love.resize(w, h)
 	-- [Resize the console if the window is resized.]
+	console.resize(w, h)
 end
 ```
 
