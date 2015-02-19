@@ -27,6 +27,10 @@ function love.textinput(t)
 	-- [Receive text input and pass it on to the console.]
 	console.textinput(t)
 end
+
+function love.resize(w, h)
+	-- [Resize the console if the window is resized.]
+end
 ```
 
 From there on you can run your application as your normally would. At this point while your application is running you can hit *F10* to bring up the console. This can be done assuming you are using the default key bindings and have not made any changes to the configuration file as explained in the next section. If you've gotten this far your console is pretty much ready to be used. If you want to take it even further you should check out the next section.
