@@ -373,24 +373,28 @@ function console.keypressed(key)
 		elseif consoleActive then
 			if key == "return" then
 				if consoleInput ~= "" then
-					-- Store the line in the stack.
-					if #consoleInputStack > config.stackMax then
-						table.remove(consoleInputStack, 1)
+					if consoleInput:match("%S") then
+						-- Store the line in the stack.
+						if #consoleInputStack > config.stackMax then
+							table.remove(consoleInputStack, 1)
+						end
+
+						consoleInputStack[#consoleInputStack + 1] = consoleInput
+						consoleInputStackCount = #consoleInputStack
+
+						-- Execute the given string command and reset the input field.
+						console.perform(consoleInput)
+						consoleInput = ""
+
+						-- Also reset the stack shift.
+						consoleStackShift = 0
+						consoleInputStackShift = 0
+
+						-- Reset the cursor index
+						consoleCursorIndex = 0
+					else
+						consoleInput = ""
 					end
-
-					consoleInputStack[#consoleInputStack + 1] = consoleInput
-					consoleInputStackCount = #consoleInputStack
-
-					-- Execute the given string command and reset the input field.
-					console.perform(consoleInput)
-					consoleInput = ""
-
-					-- Also reset the stack shift.
-					consoleStackShift = 0
-					consoleInputStackShift = 0
-
-					-- Reset the cursor index
-					consoleCursorIndex = 0
 				end
 
 			elseif key == "backspace" then

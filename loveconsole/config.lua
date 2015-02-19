@@ -1,5 +1,5 @@
 
--- User configuration file for console.lua
+-- User configuration file for LOVEConsole
 -- We keep this file separate since it mainly consists of defining variables.
 
 local config = {} -- Table containing the settings returned to the main system.
