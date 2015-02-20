@@ -365,6 +365,10 @@ function console.draw()
 			-- Draw the error count.
 			love.graphics.setColor(config.colors["error"].r, config.colors["error"].g, config.colors["error"].b, config.colors["error"].a)
 			love.graphics.printf(math.min(9999, errorCount), width + config.outlineSize - (width / 5 + config.fontSize / 2), config.outlineSize + (config.fontSize / 6), 2, "center")
+
+			-- Reset color.
+			love.graphics.setColor(255, 255, 255, 255)
+			love.graphics.setFont(baseFont)
 		end
 	end
 end
