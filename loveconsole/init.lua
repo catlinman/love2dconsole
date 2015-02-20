@@ -368,6 +368,7 @@ function console.draw()
 
 			-- Reset color.
 			love.graphics.setColor(255, 255, 255, 255)
+			love.graphics.setFont(baseFont)
 		end
 	end
 end
