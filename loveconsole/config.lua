@@ -20,6 +20,7 @@ config.consoleMarginTop = 0 -- Top border margin of the console text.
 config.lineSpacing = 4 -- Space between individual lines.
 config.outlineSize = 1 -- Outline height at the bottom of the console.
 config.ignoreToggleKey = false -- If true, the toggle key will not be inputted to the console's input field.
+config.displayPrint = false -- If true the default print function will print to the console.
 
 config.stackMax = 100  -- Maximum number of lines stored in the console stack before old lines are removed.
 config.sizeMin = 5 -- Minimum lines the console should display before extending to the max size.

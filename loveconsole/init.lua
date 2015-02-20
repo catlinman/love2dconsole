@@ -41,6 +41,8 @@ local warningCount, errorCount = 0, 0 -- Track the number of unchecked errors an
 
 local screenWidth, screenHeight = love.graphics.getDimensions() -- Store the screen size.
 
+local defaultPrint = print
+
 -- Returns the current lua local path to this script.
 local function scriptPath()
    local str = debug.getinfo(2, "S").source:sub(2)
@@ -178,7 +180,7 @@ function console.success(message)
 	end
 end
 
--- Print a string to the console with error styling  and add to the error count.
+-- Print a string to the console with error styling and add to the error count.
 function console.error(message)
 	if config.enabled then
 		if message ~= nil then
@@ -187,6 +189,14 @@ function console.error(message)
 		else
 			stackpush("Please supply a value before sending an error message to the console.", "warning")
 		end
+	end
+end
+
+-- Print a string to the console using the default print function.
+function print(...)
+	defaultPrint(...)
+	if config.displayPrint then
+		console.print(...)
 	end
 end
 
