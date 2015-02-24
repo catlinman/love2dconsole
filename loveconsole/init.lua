@@ -146,10 +146,14 @@ end
 function console.print(message, color)
 	if config.enabled then
 		if message ~= nil then
-			if not color then
-				stackpush(message, "default")
-			else
-				stackpush(message, color)
+			messages = string.split(message, '\n')
+			
+			for i, m in pairs(messages) do
+				if not color then
+					stackpush(m, "default")
+				else
+					stackpush(m, color)
+				end
 			end
 		else
 			stackpush("Please supply a value before printing to the console.", "warning")
@@ -161,8 +165,13 @@ end
 function console.warning(message)
 	if config.enabled then
 		if message ~= nil then
+			messages = string.split(message, '\n')
+			
+			for i, m in pairs(messages) do
+				stackpush("Warning: " .. m, "warning")
+			end
+
 			warningCount = warningCount + 1
-			stackpush("Warning: " .. message, "warning")
 		else
 			stackpush("Please supply a value before sending a warning message to the console.", "warning")
 		end
@@ -173,7 +182,11 @@ end
 function console.success(message)
 	if config.enabled then
 		if message ~= nil then
-			stackpush("Success: " .. message, "success")
+			messages = string.split(message, '\n')
+			
+			for i, m in pairs(messages) do
+				stackpush("Success: " .. m, "success")
+			end
 		else
 			stackpush("Please supply a value before sending a warning message to the console.", "warning")
 		end
@@ -184,8 +197,13 @@ end
 function console.error(message)
 	if config.enabled then
 		if message ~= nil then
+			messages = string.split(message, '\n')
+			
+			for i, m in pairs(messages) do
+				stackpush("Error: " .. m, "error")
+			end
+
 			errorCount = errorCount + 1
-			stackpush("Error: " .. message, "error")
 		else
 			stackpush("Please supply a value before sending an error message to the console.", "warning")
 		end
