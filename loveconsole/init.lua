@@ -162,7 +162,7 @@ function console.warning(message)
 	if config.enabled then
 		if message ~= nil then
 			warningCount = warningCount + 1
-			stackpush("Warning: " ..message, "warning")
+			stackpush("Warning: " .. message, "warning")
 		else
 			stackpush("Please supply a value before sending a warning message to the console.", "warning")
 		end
@@ -173,7 +173,7 @@ end
 function console.success(message)
 	if config.enabled then
 		if message ~= nil then
-			stackpush("Success: " ..message, "success")
+			stackpush("Success: " .. message, "success")
 		else
 			stackpush("Please supply a value before sending a warning message to the console.", "warning")
 		end
@@ -185,7 +185,7 @@ function console.error(message)
 	if config.enabled then
 		if message ~= nil then
 			errorCount = errorCount + 1
-			stackpush("Error: " ..message, "error")
+			stackpush("Error: " .. message, "error")
 		else
 			stackpush("Please supply a value before sending an error message to the console.", "warning")
 		end
@@ -205,7 +205,7 @@ function console.addCommand(name, callback, description)
 	if not consoleCommands[name] then
 		consoleCommands[name] = {["callback"] = callback, ["description"] = description or ""}
 	else
-		print("[Console] The command with the name of " ..name " already exists in the command table.")
+		print("[Console] The command with the name of " .. name .. " already exists in the command table.")
 	end
 end
 
@@ -215,7 +215,7 @@ function console.removeCommand(name)
 		consoleCommands[name] = nil
 		collectgarbage()
 	else
-		print("[Console] Unable to find the command with the name of " ..name " in the command table.")
+		print("[Console] Unable to find the command with the name of " .. name .. " in the command table.")
 	end
 end
 
