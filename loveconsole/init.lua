@@ -92,7 +92,9 @@ local function range(a, b, step)
 		b = a
 		a = 1
 	end
+
 	step = step or 1
+
 	local f = step > 0 and
 		function(_, lastvalue)
 			local nextvalue = lastvalue + step
@@ -123,6 +125,22 @@ local function stackpush(message, color)
 	end
 end
 
+-- Inserts line breaks into a string.
+local function linify(message)
+	local editedmessage = message
+	local averagelength = consoleFont:getWidth(message) / #tostring(message)
+	local segementlength = (screenWidth / averagelength) - (config.consoleMarginEdge * 2)
+	local numsplits = math.floor(#tostring(message) / segementlength)
+
+	if numsplits > 0 then
+		for i = 1, numsplits, 1 do
+			editedmessage = string.insert(editedmessage, '\n', segementlength * i + (2 * (i - 1)))
+		end
+	end
+
+	return string.split(tostring(editedmessage), '\n')
+end
+
 -- Console functions that can be called outside of console.lua
 -- Toggle the console.
 function console.toggle(state)
@@ -146,9 +164,10 @@ end
 function console.print(message, color)
 	if config.enabled then
 		if message ~= nil then
-			messages = string.split(message, '\n')
+
+			lines = linify(message)
 			
-			for i, m in pairs(messages) do
+			for i, m in pairs(lines) do
 				if not color then
 					stackpush(m, "default")
 				else
@@ -165,9 +184,9 @@ end
 function console.warning(message)
 	if config.enabled then
 		if message ~= nil then
-			messages = string.split(message, '\n')
+			lines = linify(message)
 			
-			for i, m in pairs(messages) do
+			for i, m in pairs(lines) do
 				stackpush("Warning: " .. m, "warning")
 			end
 
@@ -182,9 +201,9 @@ end
 function console.success(message)
 	if config.enabled then
 		if message ~= nil then
-			messages = string.split(message, '\n')
+			lines = linify(message)
 			
-			for i, m in pairs(messages) do
+			for i, m in pairs(lines) do
 				stackpush("Success: " .. m, "success")
 			end
 		else
@@ -197,9 +216,9 @@ end
 function console.error(message)
 	if config.enabled then
 		if message ~= nil then
-			messages = string.split(message, '\n')
+			lines = linify(message)
 			
-			for i, m in pairs(messages) do
+			for i, m in pairs(lines) do
 				stackpush("Error: " .. m, "error")
 			end
 
@@ -213,6 +232,7 @@ end
 -- Print a string to the console using the default print function.
 function print(...)
 	defaultPrint(...)
+
 	if config.displayPrint then
 		console.print(...)
 	end
@@ -334,7 +354,6 @@ function console.draw()
 			elseif type(entry.color) == "table" then
 				local r, g, b, a = entry.color.r or 255, entry.color.g or 255, entry.color.b or 255, entry.color.a or 255
 				love.graphics.setColor(r, g, b, a)
-
 			else
 				love.graphics.setColor(config.colors["text"].r, config.colors["text"].g, config.colors["text"].b, config.colors["text"].a)
 			end
@@ -345,9 +364,9 @@ function console.draw()
 		-- Draw the input line.
 		local consoleInputEdited = consoleInput
 		if math.ceil(os.clock() * config.cursorSpeed) % 2 == 0 then
-			consoleInputEdited = string.insert(consoleInput ,"|", consoleCursorIndex)
+			consoleInputEdited = string.insert(consoleInput, "|", consoleCursorIndex)
 		else
-			consoleInputEdited = string.insert(consoleInput ," ", consoleCursorIndex)
+			consoleInputEdited = string.insert(consoleInput, " ", consoleCursorIndex)
 		end
 
 		love.graphics.setColor(config.colors["input"].r, config.colors["input"].g, config.colors["input"].b, config.colors["input"].a)
@@ -603,6 +622,7 @@ console.addCommand("help", function(args)
 		end
 	else
 		local name = table.concat(args, " ")
+		
 		if consoleCommands[name] then
 			if consoleCommands[name].description then
 				console.print(string.format("%s - %s", name, consoleCommands[name].description), {r = 0, g = 255, b = 0})

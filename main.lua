@@ -14,7 +14,7 @@ function love.load()
 	-- Simple "Hello user" example command.
 	console.addCommand("hello", function(args)
 		if args then
-			console.print(string.format("Greetings %s!", args[1]))
+			console.print(string.format("Greetings %s!", args[1]))	
 		else
 			console.print("Hey there!")
 		end
