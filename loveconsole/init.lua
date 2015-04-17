@@ -457,6 +457,10 @@ function console.keypressed(key)
 			elseif key == "delete" then
 				consoleInput = string.pop(consoleInput, consoleCursorIndex)
 
+			elseif love.keyboard.isDown("lctrl", "rctrl") and love.keyboard.isDown("v") then
+				consoleInput = string.insert(consoleInput, love.system.getClipboardText(), consoleCursorIndex)
+				consoleCursorIndex = consoleCursorIndex + string.len(love.system.getClipboardText())
+
 			elseif key == config.keys.scrollUp then
 				if #consoleStack > config.sizeMax then
 					-- Move the stack up.

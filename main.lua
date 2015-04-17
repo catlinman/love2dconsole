@@ -10,8 +10,8 @@ function love.load()
 	console.error("Many error very scare.")
 	console.success("User is spooked.")
 
-	-- We defined custom commands using the
-	-- Simple "Hello user" example command.
+	-- We define custom commands using the addCommand method.
+	-- A simple "Hello user" example command can be seen below.
 	console.addCommand("hello", function(args)
 		if args then
 			console.print(string.format("Greetings %s!", args[1]))	
