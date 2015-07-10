@@ -4,9 +4,9 @@ This is an in-application debugging and command console created for the [LÖVE2D
 
 ## Installation and use ##
 
-Getting LOVEConsole to run is a fairly simple and straightforward task. All that needs to be done to get started is to put *loveconsole* folder somewhere in you LÖVE2D project and to then *require* the folder from your *main.lua*. It is suggested that you do it from there since LOVEConsole requires you to hook some of LÖVE's main functions to it. This way it can receive information like key presses and also draw at the end of the main draw loop.
+Getting LOVEConsole to run is a fairly simple and straightforward task. All that needs to be done is to put the *loveconsole* folder somewhere in you LÖVE2D project and to then *require* the folder from your *main.lua*. It is suggested that you do it from there since LOVEConsole requires you to hook some of LÖVE's main functions to it. This way it can receive information such as key presses and also draw at the end of the main draw loop.
 
-An example of how this can be done can either be seen in this repository's [*main.lua*](https://github.com/Catlinman/LOVEConsole/blob/master/main.lua) file or somewhat abstracted in the code below.
+An example of how this can be seen in this repository's [*main.lua*](https://github.com/catlinman/loveconsole/blob/master/main.lua) file or somewhat abstracted in the code below.
 
 ```lua
  -- Require the console script and assign it to a variable.
@@ -127,4 +127,4 @@ LOVEConsole comes with a set of predefined commands which are declared towards t
 
 ## License ##
 
-This repository is released under the MIT license. For more information please refer to [LICENSE](https://github.com/Catlinman/LOVEConsole/blob/master/LICENSE)
+This repository is released under the MIT license. For more information please refer to [LICENSE](https://github.com/catlinman/loveconsole/blob/master/LICENSE)

@@ -3,14 +3,14 @@
 
 	LOVEConsole was created by Catlinman and can be forked on GitHub
 
-	-> https://github.com/Catlinman/LOVEConsole
+	-> https://github.com/catlinman/loveconsole
 
 	This file allows for in-application executing and handling of function and variables allowing for more flexibility while debugging.
 
 	Feel free to modify the file to your liking as long as I am credited for the original work.
 	For more information please refer to the following link:
 
-	-> https://github.com/Catlinman/LOVEConsole/blob/master/LICENSE.md
+	-> https://github.com/catlinman/loveconsole/blob/master/LICENSE.md
 	
 	The configuration file (config.lua) contains all the necessary settings for the console to work correctly.
 	At the moment this means that if a variable within the configuration is not set the actual console will cause errors and not work.
