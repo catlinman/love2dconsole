@@ -76,7 +76,7 @@ function string.insert(s1, s2, pos)
 	return string.sub(s1, 1, pos) ..s2 ..string.sub(s1, pos + 1, #s1)
 end
 
--- Drop a character a certain position.
+-- Drop a character at a specified position.
 function string.pop(str, pos)
 	return string.sub(str, 1, pos) ..string.sub(str, pos + 2, #str)
 end
