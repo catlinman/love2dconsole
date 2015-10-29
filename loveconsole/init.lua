@@ -10,7 +10,7 @@
 	Feel free to modify the file to your liking as long as I am credited for the original work.
 	For more information please refer to the following link:
 
-	-> https://github.com/catlinman/loveconsole/blob/master/LICENSE.md
+	-> https://github.com/catlinman/loveconsole/blob/master/LICENSE
 	
 	The configuration file (config.lua) contains all the necessary settings for the console to work correctly.
 	At the moment this means that if a variable within the configuration is not set the actual console will cause errors and not work.
