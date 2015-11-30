@@ -10,7 +10,8 @@ config.colors = {} -- Table containing the console style colors.
 config.enabled = true -- If true the user is able to show/hide the console.
 config.alert = true -- If true the console will display a widget on warnings and errors.
 
-config.inputChar = ">" -- Characters displayed at the start of the input line.
+config.echoLine = true -- print entered line to console
+config.inputChar = "> " -- Characters displayed at the start of the input line.
 config.scrollChar = "..." -- Scroll handle characters.
 config.cursorSpeed = 1.5 -- Speed at which the cursor blinks.
 config.fontName = "" -- Filename of the font to be used. Leave it blank to use the default font.
