@@ -234,7 +234,7 @@ function print(...)
 	defaultPrint(...)
 
 	if config.displayPrint then
-		console.print(...)
+		console.print(table.concat({...}, " "))
 	end
 end
 
