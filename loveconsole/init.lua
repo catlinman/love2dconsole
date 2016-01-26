@@ -333,11 +333,11 @@ function console.draw()
 
 			-- Show scroll arrows if there are more lines to display.
 			if consoleStackShift ~= math.min(#consoleStack - config.sizeMax, config.stackMax) then
-				love.graphics.printf(config.scrollChar, screenWidth - config.consoleMarginEdge, config.consoleMarginTop, 1, "right")
+				love.graphics.printf(config.scrollChar, 0, config.consoleMarginTop, screenWidth - config.consoleMarginEdge, "right")
 			end
 
 			if consoleStackShift ~= 0 then
-				love.graphics.printf(config.scrollChar, screenWidth - config.consoleMarginEdge, config.consoleMarginTop + (config.lineSpacing * config.sizeMax) + (config.sizeMax * config.fontSize), 1, "right")
+				love.graphics.printf(config.scrollChar, 0, config.consoleMarginTop + (config.lineSpacing * config.sizeMax) + (config.sizeMax * config.fontSize), screenWidth - config.consoleMarginEdge, "right")
 			end
 		end
 
@@ -399,11 +399,11 @@ function console.draw()
 
 			-- Draw the warning count.
 			love.graphics.setColor(config.colors["warning"].r, config.colors["warning"].g, config.colors["warning"].b, config.colors["warning"].a)
-			love.graphics.printf(math.min(9999, warningCount), config.outlineSize + (width / 5 + config.fontSize / 2), config.outlineSize + (config.fontSize / 6), 2, "center")
+			love.graphics.printf(math.min(9999, warningCount), 0, config.outlineSize + (config.fontSize / 6),  config.outlineSize + (width / 5 + config.fontSize / 2), "center")
 
 			-- Draw the error count.
 			love.graphics.setColor(config.colors["error"].r, config.colors["error"].g, config.colors["error"].b, config.colors["error"].a)
-			love.graphics.printf(math.min(9999, errorCount), width + config.outlineSize - (width / 5 + config.fontSize / 2), config.outlineSize + (config.fontSize / 6), 2, "center")
+			love.graphics.printf(math.min(9999, errorCount), 0, config.outlineSize + (config.fontSize / 6), width + config.outlineSize - (width / 5 + config.fontSize / 2), "center")
 
 			-- Reset color.
 			love.graphics.setColor(255, 255, 255, 255)
@@ -424,7 +424,7 @@ function console.keypressed(key)
 			console.toggle()
 
 		elseif consoleActive then
-			if key == "return" then
+			if key == "return" or key == "kpenter" then
 				if consoleInput == "" then
 					consoleInput = lastConsoleInput or ""
 				end
