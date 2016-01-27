@@ -11,7 +11,7 @@
 	For more information please refer to the following link:
 
 	-> https://github.com/catlinman/loveconsole/blob/master/LICENSE
-	
+
 	The configuration file (config.lua) contains all the necessary settings for the console to work correctly.
 	At the moment this means that if a variable within the configuration is not set the actual console will cause errors and not work.
 
@@ -166,7 +166,7 @@ function console.print(message, color)
 		if message ~= nil then
 
 			lines = linify(message)
-			
+
 			for i, m in pairs(lines) do
 				if not color then
 					stackpush(m, "default")
@@ -185,7 +185,7 @@ function console.warning(message)
 	if config.enabled then
 		if message ~= nil then
 			lines = linify(message)
-			
+
 			for i, m in pairs(lines) do
 				stackpush("Warning: " .. m, "warning")
 			end
@@ -202,7 +202,7 @@ function console.success(message)
 	if config.enabled then
 		if message ~= nil then
 			lines = linify(message)
-			
+
 			for i, m in pairs(lines) do
 				stackpush("Success: " .. m, "success")
 			end
@@ -217,7 +217,7 @@ function console.error(message)
 	if config.enabled then
 		if message ~= nil then
 			lines = linify(message)
-			
+
 			for i, m in pairs(lines) do
 				stackpush("Error: " .. m, "error")
 			end
@@ -234,7 +234,7 @@ function print(...)
 	defaultPrint(...)
 
 	if config.displayPrint then
-		console.print(table.concat({...}, " "))
+		console.print(...)
 	end
 end
 
@@ -285,8 +285,6 @@ function console.perform(line)
 		if err then
 			console.print(string.format("Executing %s returned the following error: %s", command, tostring(err)))
 		end
-	elseif console.parseLine then
-		console.parseLine(line)
 	else
 		console.print(string.format("Unknown command '%s'", command))
 	end
@@ -333,11 +331,11 @@ function console.draw()
 
 			-- Show scroll arrows if there are more lines to display.
 			if consoleStackShift ~= math.min(#consoleStack - config.sizeMax, config.stackMax) then
-				love.graphics.printf(config.scrollChar, screenWidth - config.consoleMarginEdge, config.consoleMarginTop, 1, "right")
+				love.graphics.printf(config.scrollChar, 0, config.consoleMarginTop, screenWidth - config.consoleMarginEdge, "right")
 			end
 
 			if consoleStackShift ~= 0 then
-				love.graphics.printf(config.scrollChar, screenWidth - config.consoleMarginEdge, config.consoleMarginTop + (config.lineSpacing * config.sizeMax) + (config.sizeMax * config.fontSize), 1, "right")
+				love.graphics.printf(config.scrollChar, 0, config.consoleMarginTop + (config.lineSpacing * config.sizeMax) + (config.sizeMax * config.fontSize), screenWidth - config.consoleMarginEdge, "right")
 			end
 		end
 
@@ -372,7 +370,7 @@ function console.draw()
 		end
 
 		love.graphics.setColor(config.colors["input"].r, config.colors["input"].g, config.colors["input"].b, config.colors["input"].a)
-		love.graphics.print(string.format("%s%s", config.inputChar, consoleInputEdited), config.consoleMarginEdge,config.consoleMarginTop +
+		love.graphics.print(string.format("%s %s", config.inputChar, consoleInputEdited), config.consoleMarginEdge,config.consoleMarginTop +
 			(config.lineSpacing * math.max(math.min(consoleStackCount, config.sizeMax) + 1, 1)) +
 			(math.min(consoleStackCount, config.sizeMax) * config.fontSize)
 		)
@@ -399,11 +397,11 @@ function console.draw()
 
 			-- Draw the warning count.
 			love.graphics.setColor(config.colors["warning"].r, config.colors["warning"].g, config.colors["warning"].b, config.colors["warning"].a)
-			love.graphics.printf(math.min(9999, warningCount), config.outlineSize + (width / 5 + config.fontSize / 2), config.outlineSize + (config.fontSize / 6), 2, "center")
+			love.graphics.printf(math.min(9999, warningCount), math.ceil(config.outlineSize - config.fontSize / 2), math.ceil(config.outlineSize + (config.fontSize / 6)), config.fontSize * 4, "center")
 
 			-- Draw the error count.
 			love.graphics.setColor(config.colors["error"].r, config.colors["error"].g, config.colors["error"].b, config.colors["error"].a)
-			love.graphics.printf(math.min(9999, errorCount), width + config.outlineSize - (width / 5 + config.fontSize / 2), config.outlineSize + (config.fontSize / 6), 2, "center")
+			love.graphics.printf(math.min(9999, errorCount), math.ceil(config.outlineSize + config.fontSize * 2.5), math.ceil(config.outlineSize + (config.fontSize / 6)), config.fontSize * 4, "center")
 
 			-- Reset color.
 			love.graphics.setColor(255, 255, 255, 255)
@@ -424,12 +422,8 @@ function console.keypressed(key)
 			console.toggle()
 
 		elseif consoleActive then
-			if key == "return" then
-				if consoleInput == "" then
-					consoleInput = lastConsoleInput or ""
-				end
+			if key == "return" or key == "kpenter" then
 				if consoleInput ~= "" then
-					lastConsoleInput = consoleInput
 					if consoleInput:match("%S") then
 						-- Store the line in the stack.
 						if #consoleInputStack > config.stackMax then
@@ -438,11 +432,6 @@ function console.keypressed(key)
 
 						consoleInputStack[#consoleInputStack + 1] = consoleInput
 						consoleInputStackCount = #consoleInputStack
-
-						-- echo line if enabled
-						if config.echoLine then
-    							console.print(string.format("%s%s", config.inputChar, consoleInput))
-	    					end
 
 						-- Execute the given string command and reset the input field.
 						console.perform(consoleInput)
@@ -481,7 +470,7 @@ function console.keypressed(key)
 			elseif key == config.keys.scrollDown then
 				-- Move the stack down.
 				consoleStackShift = math.max(consoleStackShift - 1, 0)
-			
+
 			elseif key == config.keys.scrollTop then
 				-- Make sure that we can actually scroll and if so, move the stack shift to show the top most line.
 				if #consoleStack > config.sizeMax then
@@ -637,7 +626,7 @@ console.addCommand("help", function(args)
 		end
 	else
 		local name = table.concat(args, " ")
-		
+
 		if consoleCommands[name] then
 			if consoleCommands[name].description then
 				console.print(string.format("%s - %s", name, consoleCommands[name].description), {r = 0, g = 255, b = 0})
