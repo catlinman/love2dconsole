@@ -286,7 +286,7 @@ function console.perform(line)
 			console.print(string.format("Executing %s returned the following error: %s", command, tostring(err)))
 		end
 	elseif console.parseLine then
-	    console.parseLine(line)
+		console.parseLine(line)
 	else
 		console.print(string.format("Unknown command '%s'", command))
 	end
@@ -425,11 +425,12 @@ function console.keypressed(key)
 
 		elseif consoleActive then
 			if key == "return" or key == "kpenter" then
-			    if consoleInput == "" then
-			        consoleInput = lastConsoleInput or ""
-			    end
+				if consoleInput == "" then
+			    		consoleInput = lastConsoleInput or ""
+			    	end
+			    	
 				if consoleInput ~= "" then
-				    lastConsoleInput = consoleInput
+					lastConsoleInput = consoleInput
 					if consoleInput:match("%S") then
 						-- Store the line in the stack.
 						if #consoleInputStack > config.stackMax then
@@ -441,7 +442,7 @@ function console.keypressed(key)
 						
 						-- echo line if enabled
 						if config.echoLine then
-						    console.print(string.format("%s%s", config.inputChar, consoleInput))
+							console.print(string.format("%s%s", config.inputChar, consoleInput))
 						end
 
 						-- Execute the given string command and reset the input field.
