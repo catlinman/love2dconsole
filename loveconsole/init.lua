@@ -234,7 +234,7 @@ function print(...)
 	defaultPrint(...)
 
 	if config.displayPrint then
-		console.print(...)
+		console.print(table.concat({...}, " "))
 	end
 end
 
@@ -285,6 +285,8 @@ function console.perform(line)
 		if err then
 			console.print(string.format("Executing %s returned the following error: %s", command, tostring(err)))
 		end
+	elseif console.parseLine then
+	    console.parseLine(line)
 	else
 		console.print(string.format("Unknown command '%s'", command))
 	end
@@ -370,7 +372,7 @@ function console.draw()
 		end
 
 		love.graphics.setColor(config.colors["input"].r, config.colors["input"].g, config.colors["input"].b, config.colors["input"].a)
-		love.graphics.print(string.format("%s %s", config.inputChar, consoleInputEdited), config.consoleMarginEdge,config.consoleMarginTop +
+		love.graphics.print(string.format("%s%s", config.inputChar, consoleInputEdited), config.consoleMarginEdge,config.consoleMarginTop +
 			(config.lineSpacing * math.max(math.min(consoleStackCount, config.sizeMax) + 1, 1)) +
 			(math.min(consoleStackCount, config.sizeMax) * config.fontSize)
 		)
@@ -423,7 +425,11 @@ function console.keypressed(key)
 
 		elseif consoleActive then
 			if key == "return" or key == "kpenter" then
+			    if consoleInput == "" then
+			        consoleInput = lastConsoleInput or ""
+			    end
 				if consoleInput ~= "" then
+				    lastConsoleInput = consoleInput
 					if consoleInput:match("%S") then
 						-- Store the line in the stack.
 						if #consoleInputStack > config.stackMax then
@@ -432,6 +438,11 @@ function console.keypressed(key)
 
 						consoleInputStack[#consoleInputStack + 1] = consoleInput
 						consoleInputStackCount = #consoleInputStack
+						
+						-- echo line if enabled
+						if config.echoLine then
+						    console.print(string.format("%s%s", config.inputChar, consoleInput))
+						end
 
 						-- Execute the given string command and reset the input field.
 						console.perform(consoleInput)
