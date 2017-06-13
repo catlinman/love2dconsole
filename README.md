@@ -1,3 +1,4 @@
+
 # LOVEConsole #
 
 This is an in-application debugging and command console created for the [LÖVE2D game framework](https://love2d.org/). The console allows for rapid game testing by allowing the execution of user defined commands as well as native Lua functions. It also displays a useful overlay indicating a count of warnings and errors printed to the console to notify the user of any events that occur during execution.
@@ -86,6 +87,7 @@ In the configuration file you will also find some variables which define the key
 	<td>Move the input cursor to the right.
   </tr>
 </table>
+
 ## Built-in commands ##
 
 LOVEConsole comes with a set of predefined commands which are declared towards the end of the *init.lua* file. Some of these are just to show what the console is capable of while others allow you to interface with native code. You can find a full listing of these commands in the table below.
