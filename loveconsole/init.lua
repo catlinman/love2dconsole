@@ -129,7 +129,7 @@ end
 local function linify(message)
 	local editedmessage = message
 	local averagelength = consoleFont:getWidth(message) / #tostring(message)
-	local segementlength = (screenWidth / averagelength) - (config.consoleMarginEdge * 2)
+	local segementlength = math.floor((screenWidth - config.consoleMarginEdge * 2) / averagelength)
 	local numsplits = math.floor(#tostring(message) / segementlength)
 
 	if numsplits > 0 then
